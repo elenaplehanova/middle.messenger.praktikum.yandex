@@ -2,7 +2,7 @@
 [![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
 [![Handlebars](https://img.shields.io/badge/Handlebars.js-f0772b?style=for-the-badge&logo=handlebars.js&logoColor=black)](https://handlebarsjs.com/)
 [![Netlify](https://img.shields.io/badge/Netlify-00C7B7?style=for-the-badge&logo=netlify&logoColor=white)](https://statuesque-puppy-8f0c54.netlify.app)
-[![Node.js](https://img.shields.io/badge/Node.js-20.0.0+-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-18.0.0+-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
 
 #
 
@@ -47,7 +47,7 @@ npm run start
 npm run dev
 ```
 
-> 💡 Проект требует **Node.js 20+**
+> 💡 Проект требует **Node.js 18+**
 
 ```bash
 # Проверка версии
