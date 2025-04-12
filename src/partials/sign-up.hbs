@@ -1,11 +1,13 @@
-<div class="sign-in">
-  <h1 class="title sign-in__title">Get Started</h1>
-  {{>input-text label='First name' name='first_name'}}
-  {{>input-text label='Second name' name='second_name'}}
-  {{>input-text label='Login' name='login'}}
-  {{>input-text label='email' name='email'}}
-  {{>input-password label='Password' name='password'}}
-  {{>input-phone label='Phone' name='phone'}}
-  <button class="button sign-in__button">Sign up</button> 
-  <a class="link" href="sign-in.html" >Sign in</a> 
+<div class="auth-form">
+  <h1 class="title auth-form__title">Get Started</h1>
+  <form class="auth-form__form">
+    {{>input-text label='First name' name='first_name'}}
+    {{>input-text label='Second name' name='second_name'}}
+    {{>input-text label='Login' name='login'}}
+    {{>input-text label='email' name='email'}}
+    {{>input-password label='Password' name='password'}}
+    {{>input-phone label='Phone' name='phone'}}
+    <button class="button auth-form__button" type="submit">Sign up</button>
+  </form>
+  <a class="link" href="sign-in.html">Sign in</a>
 </div>

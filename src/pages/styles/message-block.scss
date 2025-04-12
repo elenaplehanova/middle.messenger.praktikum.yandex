@@ -1,0 +1,50 @@
+.message-block {
+  border-left: 1px solid var(--violet-bright-2, violet);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  background-color: var(--violet-background-dark, gray);
+  width: 100%;
+
+  &__title {
+    font-size: 20px;
+    border-bottom: 1px solid var(--violet-bright-2, violet);
+    height: 30px;
+    background-color: var(--violet-background-light-2, white);
+    padding-left: 20px;
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column-reverse;
+    padding-inline: 10px;
+    gap: 10px;
+  }
+
+  &__message {
+    width: fit-content;
+    max-width: 300px;
+    background-color: var(--violet-dark, black);
+    border-radius: 5px;
+    box-shadow: var(--box-shadow);
+    color: var(--white-color, white);
+    padding: 5px 10px;
+    align-self: end;
+
+    &_incoming {
+      background-color: var(--white-color, white);
+      color: currentColor;
+      align-self: start;
+    }
+  }
+
+  &__message-panel {
+    display: flex;
+    padding: 5px;
+  }
+  &__input {
+    width: calc(100% - var(--width-send-button, 40px));
+  }
+  &__button {
+    width: var(--width-send-button, 40px);
+  }
+}
