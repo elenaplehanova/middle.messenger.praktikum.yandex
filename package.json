@@ -1,0 +1,26 @@
+{
+  "name": "vite-project",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",    
+    "build": "vite build",
+    "preview": "vite preview",
+    "start": "vite build && vite preview"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.21",
+    "postcss-flexbugs-fixes": "^5.0.2",
+    "postcss-gap-properties": "^6.0.0",
+    "sass": "^1.86.3",
+    "vite": "^6.2.0"
+  },
+  "dependencies": {
+    "handlebars": "^4.7.8",
+    "vite-plugin-handlebars": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

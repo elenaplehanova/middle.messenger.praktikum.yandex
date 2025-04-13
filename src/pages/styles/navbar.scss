@@ -1,0 +1,20 @@
+.navbar {
+  color: var(--violet-background-light-2, white);
+  &__list {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    padding: 20px;
+  }
+  &__list-item {
+    list-style: none;
+  }
+  &__link {
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    &:hover {
+      border-bottom: 1px solid currentColor;
+      transition: border-bottom-color 0.35s;
+    }
+  }
+}

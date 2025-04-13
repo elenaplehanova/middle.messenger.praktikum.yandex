@@ -1,0 +1,63 @@
+:root {
+  --dark-color: #000;
+  --white-color: #f5f5f5;
+  --violet-bright-1: #756eeb;
+  --violet-bright-2: #c58fde69;
+  --violet-dark: #3a3674;
+  --violet-background-dark: #9d9cc3;
+  --violet-background-dark-2: #47465c;
+  --violet-background-light: #e6e5ff;
+  --violet-background-light-2: #e1e0f1;
+  --gray-color: #d9d9d9;
+  --width-send-button: 85px;
+  --shadow-color: #00000040;
+  --box-shadow: 0 4px 4px 0 var(--shadow-color, #00000040);
+}
+
+body {
+  background: var(--violet-background-dark-2, gray);
+}
+
+.main {
+  height: calc(100vh - 70px);
+  display: flex;
+}
+
+.button {
+  background-color: var(--violet-bright-1, violet);
+  color: var(--white-color, white);
+  border: 1px solid var(--violet-dark, blueviolet);
+  border-radius: 5px;
+  width: 269px;
+  height: 32px;
+  box-shadow: var(--box-shadow);
+  cursor: pointer;
+}
+
+.link {
+  display: block;
+  text-align: center;
+  font-weight: 600;
+  font-size: 12px;
+  margin-top: 16px;
+  transition: color 0.2s;
+  &:hover {
+    color: var(--violet-dark, black);
+  }
+}
+
+.title {
+  color: var(--violet-dark, black);
+  font-weight: 700;
+  font-size: 32px;
+}
+
+.photo {
+  display: block;
+  aspect-ratio: 1/1;
+  border-radius: 50%;
+  background-color: var(--gray-color, gray);
+  object-fit: cover;
+  width: 20px;
+  height: 20px;
+}
