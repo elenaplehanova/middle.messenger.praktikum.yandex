@@ -1,0 +1,69 @@
+@use "@styles/mixin/auth-form" as *;
+@use "@styles/mixin/input-block" as *;
+
+.auth-form {
+  @include auth-form;
+}
+
+.input-block {
+  @include input-block;
+}
+
+.user-settings {
+  width: 100%;
+  background-color: var(--violet-background-light, gray);
+  overflow: auto;
+  padding: 10px;
+
+  &__title {
+    text-align: center;
+    margin-block: 40px;
+  }
+
+  &__content {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  &__block {
+    display: flex;
+    flex-direction: column;
+    width: 270px;
+    justify-self: center;
+
+    & > div:not(:last-child) {
+      margin-bottom: 15px;
+    }
+  }
+
+  &__photo {
+    width: 254px;
+    height: 254px;
+  }
+
+  &__button {
+    display: block;
+    margin: auto;
+  }
+
+  &__hidden-input {
+    display: none;
+  }
+
+  &__button-change-photo {
+    border: 0;
+    background-color: transparent;
+    width: fit-content;
+    margin-inline: auto;
+    cursor: pointer;
+    font-size: 12px;
+    margin-top: 16px;
+    font-weight: 600;
+    text-decoration: underline;
+    transition: color 0.2s;
+
+    &:hover {
+      color: var(--violet-dark, black);
+    }
+  }
+}

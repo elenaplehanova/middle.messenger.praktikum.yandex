@@ -1,0 +1,22 @@
+@mixin input-block {
+  &__input-wrapper {
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__input-label {
+    margin-bottom: 5px;
+  }
+
+  &__input {
+    border: 1px solid var(--dark-color, black);
+    border-radius: 5px;
+    height: 32px;
+    padding-inline: 10px;
+  }
+
+  &__input-error {
+    color: var(--red-color, red);
+    font-size: 12px;
+  }
+}

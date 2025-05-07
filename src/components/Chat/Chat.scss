@@ -1,0 +1,55 @@
+@use "@styles/mixin/messenger-container" as *;
+
+.chat {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+
+  &__container {
+    @include messenger-container;
+  }
+
+  &__title {
+    font-size: 24px;
+    text-align: center;
+    border-bottom: 1px solid var(--violet-bright-2, black);
+  }
+
+  &__item {
+    display: grid;
+    grid-template-columns: min-content auto;
+    gap: 10px;
+    cursor: pointer;
+
+    &_active {
+      background-color: var(--violet-bright-2, violet);
+    }
+
+    &:hover:not(&_active) {
+      background-color: var(--white-color, white);
+    }
+  }
+
+  &__photo {
+    width: 64px;
+    height: 64px;
+    grid-column: 1;
+    grid-row: 1 / 3;
+    margin: 5px;
+    margin-right: 0;
+  }
+
+  &__user-name {
+    grid-column: 2;
+    align-self: flex-end;
+    font-weight: 600;
+  }
+
+  &__user-message {
+    grid-column: 2;
+  }
+
+  &__link {
+    margin-top: auto;
+    padding: 10px;
+  }
+}

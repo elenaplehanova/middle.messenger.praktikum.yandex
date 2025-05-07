@@ -1,0 +1,39 @@
+@use "@styles/mixin/messenger-container" as *;
+
+.chat-room {
+  border-left: 1px solid var(--violet-bright-2, violet);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  background-color: var(--violet-background-dark, gray);
+  width: 100%;
+
+  &__title {
+    font-size: 20px;
+    border-bottom: 1px solid var(--violet-bright-2, violet);
+    height: 30px;
+    background-color: var(--violet-background-light-2, white);
+    padding-left: 20px;
+  }
+
+  &__container {
+    @include messenger-container;
+
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    gap: 10px;
+  }
+
+  &__message-panel {
+    display: flex;
+    padding: 5px;
+  }
+
+  &__input {
+    width: calc(100% - var(--width-send-button, 40px));
+  }
+
+  &__button {
+    width: var(--width-send-button, 40px);
+  }
+}

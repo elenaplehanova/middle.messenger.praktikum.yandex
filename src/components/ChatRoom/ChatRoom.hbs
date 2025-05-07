@@ -1,0 +1,11 @@
+<div class="chat-room">
+    <div class="title chat-room__title">{{activeUserName}}</div>
+    <div class="chat-room__container"></div>
+    <form class="chat-room__message-panel chat-room__message-panel_{{activeUserName}}">
+        <div class="input input-block__input-wrapper chat-room__input">
+            <input class="input input-block__input" type="text" name="message" id="message" placeholder="Type here.." />
+            <div class="input-block__input-error" id="message-error"></div>
+        </div>
+        <div data-component="button"></div>
+    </form>
+</div>

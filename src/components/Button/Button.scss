@@ -1,0 +1,12 @@
+.button {
+    padding: 12px 24px;
+    border-radius: 4px;
+    
+    &__icon {
+      margin-right: 8px;
+    }
+    
+    &--primary {
+      background: var(--color-primary);
+    }
+  }

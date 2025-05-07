@@ -10,6 +10,8 @@
 
 Приложение для обмена сообщениями в реальном времени с открытым исходным кодом.
 
+[Demo](https://statuesque-puppy-8f0c54.netlify.app/)
+
 ## Основные возможности
 
 - **чат в реальном времени**
@@ -19,17 +21,17 @@
 
 ### 1. Главный экран чата
 
-[![Chat Interface](https://www.figma.com/embed?embed_host=share&url=https://www.figma.com/design/Z10fKciV4DCTEvOrcZLhB0/ElenaI?node-id=142-60&t=kt6ze9mJ1cI0gCkX-4)](https://www.figma.com/design/Z10fKciV4DCTEvOrcZLhB0/ElenaI?node-id=142-60)
+[Открыть в Figma](https://www.figma.com/design/Z10fKciV4DCTEvOrcZLhB0/ElenaI?node-id=142-60)
 
 ### 2. Настройки профиля
 
-[![User settings](https://www.figma.com/embed?embed_host=share&url=https://www.figma.com/design/Z10fKciV4DCTEvOrcZLhB0/ElenaI?node-id=144-107&t=9lvnghfhdiNjDh8J-4)](https://www.figma.com/design/Z10fKciV4DCTEvOrcZLhB0/ElenaI?node-id=144-107)
+[Открыть в Figma](https://www.figma.com/design/Z10fKciV4DCTEvOrcZLhB0/ElenaI?node-id=144-107)
 
 ## Технологии
 
 - **Vite**
 - **Handlebars**
-- **JS**
+- **TS**
 - **SCSS**
 
 ## Быстрый старт
