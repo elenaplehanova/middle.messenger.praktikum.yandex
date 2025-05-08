@@ -59,6 +59,7 @@ export class Component {
     this.componentDidMount();
   }
 
+  // @ts-ignore
   protected componentDidMount(oldProps?: Props): void {}
 
   public dispatchComponentDidMount(): void {
@@ -73,6 +74,7 @@ export class Component {
     this._render();
   }
 
+  // @ts-ignore
   protected componentDidUpdate(oldProps: Props, newProps: Props): boolean {
     return true;
   }

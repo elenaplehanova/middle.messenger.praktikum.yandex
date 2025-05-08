@@ -1,7 +1,6 @@
 import "./ChatRoom.scss";
 import template from "./ChatRoom.hbs?raw";
 import { compile } from "handlebars";
-import type { Props } from "@/services/Component";
 import { Component } from "@/services/Component";
 import { Button } from "@components/Button";
 import { validateMessage } from "@/utils/validation";
