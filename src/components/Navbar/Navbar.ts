@@ -6,9 +6,10 @@ import { compile } from "handlebars";
 interface NavbarProps {
   currentPage?: string;
   onNavigate?: (path: string) => void;
+  [key: string]: unknown;
 }
 
-export class Navbar extends Component {
+export class Navbar extends Component<NavbarProps> {
   constructor(props: NavbarProps = {}) {
     super("template", props);
   }

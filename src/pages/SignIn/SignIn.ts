@@ -5,16 +5,21 @@ import { Component } from "@/services/Component";
 import { compile } from "handlebars";
 import { validateLogin, validatePassword } from "@/utils/validation";
 
-const button = new Button({
-  text: "Sign in",
-  className: "auth-form__button",
-  type: "submit",
-});
-
 export class SignIn extends Component {
+  private _button: Button;
+
   constructor() {
+    const button = new Button({
+      text: "Sign in",
+      className: "auth-form__button",
+      type: "submit",
+    });
+
     super("template", { button });
+
+    this._button = button;
   }
+  
   render() {
     return compile(template)(this.props);
   }
@@ -23,11 +28,10 @@ export class SignIn extends Component {
     const placeholder = this.element?.querySelector(
       '[data-component="button"]'
     );
-    if (placeholder && this.props.button.getContent()) {
-      placeholder.replaceWith(this.props.button.getContent());
+    if (placeholder && this._button.getContent()) {
+      placeholder.replaceWith(this._button.getContent()!);
     }
-
-    this.props.button.dispatchComponentDidMount();
+    this._button.dispatchComponentDidMount();
   };
 
   private _form: HTMLElement | null = null;

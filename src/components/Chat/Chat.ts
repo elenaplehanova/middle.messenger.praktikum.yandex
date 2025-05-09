@@ -13,22 +13,27 @@ export interface ChatItem {
 interface ChatProps {
   chats: ChatItem[];
   onSelectChat?: (chat: ChatItem) => void;
+  [key: string]: unknown;
 }
 
-export class Chat extends Component {
+export class Chat extends Component<ChatProps> {
+  private _props: ChatProps;
+
   constructor(props: ChatProps) {
     super("template", props);
+
+    this._props = props;
   }
 
   handleChatClick = (chat: ChatItem) => () => {
-    const updatedChats = this.props.chats.map((c: ChatItem) => ({
+    const updatedChats = this._props.chats.map((c: ChatItem) => ({
       ...c,
       isActive: c.id === chat.id,
     }));
 
     this.setProps({ chats: updatedChats });
     this.bindEvents();
-    this.props.onSelectChat?.(chat);
+    this._props.onSelectChat?.(chat);
   };
 
   componentDidMount() {
@@ -39,7 +44,7 @@ export class Chat extends Component {
     const items = this.element?.querySelectorAll(".chat__item");
     items?.forEach((item) => {
       const chatId = item.getAttribute("data-id");
-      const chat = this.props.chats.find((c: ChatItem) => c.id === chatId);
+      const chat = this._props.chats.find((c: ChatItem) => c.id === chatId);
 
       if (chat) {
         item.addEventListener("click", this.handleChatClick(chat));

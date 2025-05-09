@@ -2,7 +2,7 @@ import { compile } from "handlebars";
 import template from "./Button.hbs?raw";
 import { Component } from "@/services/Component";
 
-interface ButtonProps {
+interface ButtonProps extends Record<string, unknown> {
   text: string;
   type?: "button" | "submit";
   className?: string;

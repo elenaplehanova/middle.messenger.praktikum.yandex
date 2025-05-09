@@ -1,8 +1,10 @@
 import { EventBus } from "./EventBus";
 
-export type Props = Record<string, any>;
+export type Props<T = unknown> = T & Record<string, unknown>;
 
-export class Component {
+export abstract class Component<
+  T extends Record<string, unknown> = Record<string, unknown>,
+> {
   static EVENTS = {
     INIT: "init",
     FLOW_CDM: "flow:component-did-mount",
@@ -13,9 +15,9 @@ export class Component {
   private _element: HTMLElement | null = null;
   private readonly _meta: {
     tagName: string;
-    props: Props;
+    props: Props<T>;
   };
-  public props: Props;
+  public props: Props<T>;
   private eventBus: () => EventBus;
 
   /** JSDoc
@@ -24,7 +26,7 @@ export class Component {
    *
    * @returns {void}
    */
-  constructor(tagName: string = "div", props: Props = {}) {
+  constructor(tagName: string = "div", props: Props<T> = {} as Props<T>) {
     const eventBus = new EventBus();
     this._meta = {
       tagName,
@@ -56,17 +58,18 @@ export class Component {
   }
 
   private _componentDidMount(): void {
-    this.componentDidMount();
+    this.componentDidMount(this._meta.props);
   }
 
-  // @ts-ignore
-  protected componentDidMount(oldProps?: Props): void {}
+  protected componentDidMount(oldProps?: Props<T>): void {
+    console.log("oldProps", oldProps);
+  }
 
   public dispatchComponentDidMount(): void {
     this.eventBus().emit(Component.EVENTS.FLOW_CDM);
   }
 
-  private _componentDidUpdate(oldProps: Props, newProps: Props): void {
+  private _componentDidUpdate(oldProps: Props<T>, newProps: Props<T>): void {
     const response = this.componentDidUpdate(oldProps, newProps);
     if (!response) {
       return;
@@ -74,16 +77,18 @@ export class Component {
     this._render();
   }
 
-  // @ts-ignore
-  protected componentDidUpdate(oldProps: Props, newProps: Props): boolean {
+  protected componentDidUpdate(
+    oldProps: Props<T>,
+    newProps: Props<T>
+  ): boolean {
+    console.log("oldProps", oldProps, "newProps", newProps);
     return true;
   }
 
-  public setProps(nextProps: Props): void {
+  public setProps(nextProps: Props<T>): void {
     if (!nextProps) {
       return;
     }
-
     Object.assign(this.props, nextProps);
   }
 
@@ -96,9 +101,12 @@ export class Component {
     if (this._element) {
       const temp = document.createElement("template");
       temp.innerHTML = component.trim();
-      const newElement = temp.content.firstElementChild as HTMLElement;
+      const newElement = temp.content.firstElementChild;
       if (!newElement) {
         throw new Error("Template must return a single root element");
+      }
+      if (!(newElement instanceof HTMLElement)) {
+        throw new Error("Template root must be a valid HTMLElement");
       }
       this._element.replaceWith(newElement);
       this._element = newElement;
@@ -113,24 +121,26 @@ export class Component {
     return this.element;
   }
 
-  private _makePropsProxy(props: Props): Props {
-    const self = this;
-
+  private _makePropsProxy(props: Props<T>): Props<T> {
     return new Proxy(props, {
-      get(target: Props, prop: string) {
-        if (prop.indexOf("_") === 0) {
+      get: <K extends keyof Props>(target: Props, prop: K): Props[K] => {
+        if (typeof prop === "string" && prop.startsWith("_")) {
           throw new Error("Access denied");
         }
 
         const value = target[prop];
         return typeof value === "function" ? value.bind(target) : value;
       },
-      set(target: Props, prop: string, value: any) {
+      set: <K extends keyof Props>(
+        target: Props,
+        prop: K,
+        value: Props[K]
+      ): boolean => {
         target[prop] = value;
-        self.eventBus().emit(Component.EVENTS.FLOW_CDU, { ...target }, target);
+        this.eventBus().emit(Component.EVENTS.FLOW_CDU, { ...target }, target);
         return true;
       },
-      deleteProperty() {
+      deleteProperty: () => {
         throw new Error("No access");
       },
     });

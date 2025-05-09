@@ -2,7 +2,7 @@ import { defineConfig } from "vite";
 import path, { resolve } from "path";
 import autoprefixer from "autoprefixer";
 import postcssGapProperties from "postcss-gap-properties";
-import postcssFlexbugsFixes from "postcss-flexbugs-fixes";
+import postcssFlexBugsFixes from "postcss-flexbugs-fixes";
 
 export default defineConfig({
   build: {
@@ -32,7 +32,7 @@ export default defineConfig({
       },
     },
     postcss: {
-      plugins: [autoprefixer(), postcssGapProperties(), postcssFlexbugsFixes()],
+      plugins: [autoprefixer(), postcssGapProperties(), postcssFlexBugsFixes()],
     },
   },
 });

@@ -11,15 +11,19 @@ import {
   validatePhone,
 } from "@/utils/validation";
 
-const button = new Button({
-  text: "Sign up",
-  className: "auth-form__button",
-  type: "submit",
-});
-
 export class SignUp extends Component {
+  private _button: Button;
+
   constructor() {
+    const button = new Button({
+      text: "Sign up",
+      className: "auth-form__button",
+      type: "submit",
+    });
+
     super("template", { button });
+
+    this._button = button;
   }
   render() {
     return compile(template)(this.props);
@@ -29,11 +33,10 @@ export class SignUp extends Component {
     const placeholder = this.element?.querySelector(
       '[data-component="button"]'
     );
-    if (placeholder && this.props.button.getContent()) {
-      placeholder.replaceWith(this.props.button.getContent());
+    if (placeholder && this._button.getContent()) {
+      placeholder.replaceWith(this._button.getContent()!);
     }
-
-    this.props.button.dispatchComponentDidMount();
+    this._button.dispatchComponentDidMount();
   };
 
   private _form: HTMLElement | null = null;

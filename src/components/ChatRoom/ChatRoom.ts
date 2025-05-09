@@ -10,9 +10,11 @@ import { formatTime } from "@/utils/formatData";
 
 interface ChatRoomProps {
   activeUserName?: string;
+  [key: string]: unknown;
 }
 
 export class ChatRoom extends Component {
+  private _button: Button;
   private _form: HTMLElement | null = null;
   private _messageInput: HTMLInputElement | null = null;
   private _yourSenderName = "Вы";
@@ -54,6 +56,8 @@ export class ChatRoom extends Component {
     });
 
     super("template", { ...props, button });
+
+    this._button = button;
   }
 
   render() {
@@ -64,10 +68,10 @@ export class ChatRoom extends Component {
     const buttonPlaceholder = this.element?.querySelector(
       '[data-component="button"]'
     );
-    if (buttonPlaceholder && this.props.button.getContent()) {
-      buttonPlaceholder.replaceWith(this.props.button.getContent());
+    if (buttonPlaceholder && this._button.getContent()) {
+      buttonPlaceholder.replaceWith(this._button.getContent()!);
     }
-    this.props.button.dispatchComponentDidMount();
+    this._button.dispatchComponentDidMount();
   };
 
   override setProps(nextProps: ChatRoomProps) {

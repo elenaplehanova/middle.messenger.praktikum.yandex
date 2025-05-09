@@ -1,83 +1,66 @@
-type HTTPMethod = "GET" | "POST" | "PUT" | "DELETE";
+enum METHODS {
+  GET = "GET",
+  POST = "POST",
+  PUT = "PUT",
+  DELETE = "DELETE",
+}
 
-type RequestOptions = {
+type HTTPMethod = <R = unknown>(
+  url: string,
+  options?: Partial<RequestOptions<QueryParams>>
+) => Promise<R>;
+
+type QueryParams = Record<string, string | number | boolean>;
+
+type RequestOptions<T = QueryParams> = {
   headers?: Record<string, string>;
-  method?: HTTPMethod;
-  data?: Record<string, unknown>;
+  method?: METHODS;
+  data?: T;
   timeout?: number;
 };
 
 export class HTTPTransport {
-  private METHODS: Record<HTTPMethod, HTTPMethod> = {
-    GET: "GET",
-    POST: "POST",
-    PUT: "PUT",
-    DELETE: "DELETE",
-  };
+  get: HTTPMethod = this.createMethod(METHODS.GET);
+  post: HTTPMethod = this.createMethod(METHODS.POST);
+  put: HTTPMethod = this.createMethod(METHODS.PUT);
+  delete: HTTPMethod = this.createMethod(METHODS.DELETE);
 
-  private queryStringify(data: Record<string, unknown>): string {
+  private queryStringify(
+    data: Record<string, string | number | boolean>
+  ): string {
     if (typeof data !== "object" || data === null) {
       throw new Error("Data must be object");
     }
-
     const keys = Object.keys(data);
     return keys.reduce((result, key, index) => {
       const value = data[key];
       const separator = index < keys.length - 1 ? "&" : "";
-      return `${result}${key}=${value}${separator}`;
+      const encodedKey = encodeURIComponent(key);
+      const encodedValue = encodeURIComponent(JSON.stringify(value));
+      return `${result}${encodedKey}=${encodedValue}${separator}`;
     }, "?");
   }
 
-  public get(
-    url: string,
-    options: Omit<RequestOptions, "method"> = {}
-  ): Promise<XMLHttpRequest> {
-    return this.request(
-      url,
-      { ...options, method: this.METHODS.GET },
-      options.timeout
-    );
+  private async parseResponse<R>(xhr: XMLHttpRequest): Promise<R> {
+    try {
+      return (await JSON.parse(xhr.responseText)) as R;
+    } catch {
+      return xhr.responseText as unknown as R;
+    }
   }
 
-  public post(
-    url: string,
-    options: Omit<RequestOptions, "method"> = {}
-  ): Promise<XMLHttpRequest> {
-    return this.request(
-      url,
-      { ...options, method: this.METHODS.POST },
-      options.timeout
-    );
-  }
-
-  public put(
-    url: string,
-    options: Omit<RequestOptions, "method"> = {}
-  ): Promise<XMLHttpRequest> {
-    return this.request(
-      url,
-      { ...options, method: this.METHODS.PUT },
-      options.timeout
-    );
-  }
-
-  public delete(
-    url: string,
-    options: Omit<RequestOptions, "method"> = {}
-  ): Promise<XMLHttpRequest> {
-    return this.request(
-      url,
-      { ...options, method: this.METHODS.DELETE },
-      options.timeout
-    );
+  private createMethod(method: METHODS): HTTPMethod {
+    return async (url, options = {}) => {
+      const response = await this.request(url, { ...options, method });
+      return this.parseResponse(response);
+    };
   }
 
   private request(
     url: string,
-    options: RequestOptions = {},
-    timeout: number = 5000
+    options: RequestOptions<QueryParams> = {}
   ): Promise<XMLHttpRequest> {
-    const { headers = {}, method, data } = options;
+    const { headers = {}, method, data, timeout = 5000 } = options;
 
     return new Promise((resolve, reject) => {
       if (!method) {
@@ -86,7 +69,7 @@ export class HTTPTransport {
       }
 
       const xhr = new XMLHttpRequest();
-      const isGet = method === this.METHODS.GET;
+      const isGet = method === METHODS.GET;
 
       if (isGet && data && typeof data === "object" && data !== null) {
         const query = this.queryStringify(data);
