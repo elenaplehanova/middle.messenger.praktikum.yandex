@@ -1,0 +1,10 @@
+@use "@styles/mixin/auth-form" as *;
+@use "@styles/mixin/input-block" as *;
+
+.auth-form {
+  @include auth-form;
+}
+
+.input-block {
+  @include input-block;
+}

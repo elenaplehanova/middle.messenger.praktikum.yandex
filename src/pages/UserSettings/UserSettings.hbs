@@ -1,0 +1,58 @@
+<div class="user-settings">
+    <h1 class="title user-settings__title">User settings</h1>
+    <form class="user-settings__form">
+        <div class="user-settings__content">
+            <div class="user-settings__block">
+                <img class="photo user-settings__photo" src="" id="image" />
+                <button class="user-settings__button-change-photo" id="changePhoto" type="button">
+                    Change photo
+                </button>
+                <input class="user-settings__hidden-input" type="file" id="avatar" name="avatar" accept="image/*" />
+            </div>
+            <div class="user-settings__block">
+                <div class="input-block__input-wrapper">
+                    <label class="input-block__input-label" for="first_name">First name</label>
+                    <input class="input-block__input" type="text" name="first_name" id="first_name" />
+                    <div class="input-block__input-error" id="first_name-error"></div>
+                </div>
+                <div class="input-block__input-wrapper">
+                    <label class="input-block__input-label" for="second_name">Second name</label>
+                    <input class="input-block__input" type="text" name="second_name" id="second_name" />
+                    <div class="input-block__input-error" id="second_name-error"></div>
+                </div>
+                <div class="input-block__input-wrapper">
+                    <label class="input-block__input-label" for="display_name">Display name</label>
+                    <input class="input-block__input" type="text" name="display_name" id="display_name" />
+                    <div class="input-block__input-error" id="display_name-error"></div>
+                </div>
+                <div class="input-block__input-wrapper">
+                    <label class="input-block__input-label" for="login">Login</label>
+                    <input class="input-block__input" type="text" name="login" id="login" />
+                    <div class="input-block__input-error" id="login-error"></div>
+                </div>
+                <div class="input-block__input-wrapper">
+                    <label class="input-block__input-label" for="email">E-mail</label>
+                    <input class="input-block__input" type="email" name="email" id="email" />
+                    <div class="input-block__input-error" id="email-error"></div>
+                </div>
+                <div class="input-block__input-wrapper">
+                    <label class="input-block__input-label" for="phone">Phone</label>
+                    <input class="input-block__input" type="tel" name="phone" id="phone" />
+                    <div class="input-block__input-error" id="phone-error"></div>
+                </div>
+                <div class="input-block__input-wrapper">
+                    <label class="input-block__input-label" for="oldPassword">Old password</label>
+                    <input class="input-block__input" type="oldPassword" name="oldPassword" id="oldPassword" />
+                    <div class="input-block__input-error" id="oldPassword-error"></div>
+                </div>
+                <div class="input-block__input-wrapper">
+                    <label class="input-block__input-label" for="newPassword">New password</label>
+                    <input class="input-block__input" type="newPassword" name="password" id="newPassword" />
+                    <div class="input-block__input-error" id="newPassword-error"></div>
+                </div>
+            </div>
+        </div>
+        <button class="button user-settings__button" type="submit">Save</button>
+    </form>
+    <a class="link" href="sign-in">Log out</a>
+</div>

@@ -1,0 +1,13 @@
+<div class="chat">
+    <h2 class="title chat__title">Chats</h2>
+    <div class="chat__container">
+        {{#each chats}}
+        <article class="chat__item {{#if isActive}}chat__item_active{{/if}}" data-id="{{id}}">
+            <div class="photo chat__photo"></div>
+            <p class="chat__user-name">{{userName}}</p>
+            <p class="chat__user-message">{{lastMessage}}</p>
+        </article>
+        {{/each}}
+    </div>
+    <a class="link chat__link" href="user-settings">User settings</a>
+</div>
