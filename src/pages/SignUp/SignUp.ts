@@ -13,6 +13,13 @@ import {
 
 export class SignUp extends Component {
   private _button: Button;
+  private _form: HTMLElement | null = null;
+  private _firstNameInput: HTMLInputElement | null = null;
+  private _secondNameInput: HTMLInputElement | null = null;
+  private _loginInput: HTMLInputElement | null = null;
+  private _emailInput: HTMLInputElement | null = null;
+  private _passwordInput: HTMLInputElement | null = null;
+  private _phoneInput: HTMLInputElement | null = null;
 
   constructor() {
     const button = new Button({
@@ -38,14 +45,6 @@ export class SignUp extends Component {
     }
     this._button.dispatchComponentDidMount();
   };
-
-  private _form: HTMLElement | null = null;
-  private _firstNameInput: HTMLInputElement | null = null;
-  private _secondNameInput: HTMLInputElement | null = null;
-  private _loginInput: HTMLInputElement | null = null;
-  private _emailInput: HTMLInputElement | null = null;
-  private _passwordInput: HTMLInputElement | null = null;
-  private _phoneInput: HTMLInputElement | null = null;
 
   handleSubmit = (e: SubmitEvent) => {
     e.preventDefault();

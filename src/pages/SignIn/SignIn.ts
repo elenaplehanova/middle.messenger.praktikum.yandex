@@ -7,6 +7,9 @@ import { validateLogin, validatePassword } from "@/utils/validation";
 
 export class SignIn extends Component {
   private _button: Button;
+  private _form: HTMLElement | null = null;
+  private _loginInput: HTMLInputElement | null = null;
+  private _passwordInput: HTMLInputElement | null = null;
 
   constructor() {
     const button = new Button({
@@ -19,7 +22,7 @@ export class SignIn extends Component {
 
     this._button = button;
   }
-  
+
   render() {
     return compile(template)(this.props);
   }
@@ -34,13 +37,8 @@ export class SignIn extends Component {
     this._button.dispatchComponentDidMount();
   };
 
-  private _form: HTMLElement | null = null;
-  private _loginInput: HTMLInputElement | null = null;
-  private _passwordInput: HTMLInputElement | null = null;
-
   handleSubmit = (e: SubmitEvent) => {
     e.preventDefault();
-
     const isLoginValid = this.validateField(this._loginInput, validateLogin);
     const isPasswordValid = this.validateField(
       this._passwordInput,

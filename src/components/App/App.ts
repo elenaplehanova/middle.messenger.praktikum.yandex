@@ -1,5 +1,5 @@
 import { Component } from "@/services/Component";
-import appTemplate from "./App.hbs?raw";
+import template from "./App.hbs?raw";
 import { compile } from "handlebars";
 import { SignIn } from "@/pages/SignIn";
 import { SignUp } from "@/pages/SignUp";
@@ -7,10 +7,22 @@ import { UserSettings } from "@/pages/UserSettings";
 import { Messenger } from "@/pages/Messenger";
 import { Navbar } from "@components/Navbar";
 import { ErrorPage } from "@/pages/ErrorPage";
+import { Router } from "@/services/Router";
+
+class Page404 extends ErrorPage {
+  constructor() {
+    super({ text: "404 Page not found" });
+  }
+}
+class Page500 extends ErrorPage {
+  constructor() {
+    super({ text: "5** server error..(((" });
+  }
+}
 
 export class App extends Component {
   private _navbar: Navbar;
-  private _currentPageComponent: Component | null = null;
+  private _router: Router;
 
   constructor() {
     const initialPath = window.location.pathname;
@@ -21,54 +33,23 @@ export class App extends Component {
     super("template", { navbar });
 
     this._navbar = navbar;
-    this.handlePageChange(initialPath);
+    this._router = new Router("#router");
+
+    this.setupRouting();
   }
 
-  private handlePageChange(path: string) {
-    const page404 = new ErrorPage({ text: "404 Page not found" });
-    const page500 = new ErrorPage({ text: "5** server error..(((" });
-
-    switch (path) {
-      case "/":
-        this._currentPageComponent = new Messenger();
-        break;
-      case "/sign-in":
-        this._currentPageComponent = new SignIn();
-        break;
-      case "/sign-up":
-        this._currentPageComponent = new SignUp();
-        break;
-      case "/user-settings":
-        this._currentPageComponent = new UserSettings();
-        break;
-      case "/page-500":
-        this._currentPageComponent = page500;
-        break;
-      case "/page-404":
-        this._currentPageComponent = page404;
-        break;
-      default:
-        this._currentPageComponent = page404;
-        break;
-    }
-
-    this._navbar.setProps({ currentPage: path });
-
-    this.updatePageContent();
-  }
-
-  private updatePageContent() {
-    const pagePlaceholder = this.element?.querySelector(
-      '[data-component="page"]'
-    );
-    if (pagePlaceholder && this._currentPageComponent?.getContent()) {
-      pagePlaceholder.replaceWith(this._currentPageComponent.getContent()!);
-      this._currentPageComponent.dispatchComponentDidMount();
-    }
+  private setupRouting() {
+    this._router
+      .use("/", Messenger)
+      .use("/sign-in", SignIn)
+      .use("/sign-up", SignUp)
+      .use("/user-settings", UserSettings)
+      .use("/page-500", Page500)
+      .use("*", Page404);
   }
 
   render() {
-    return compile(appTemplate)(this.props);
+    return compile(template)(this.props);
   }
 
   componentDidMount() {
@@ -80,6 +61,6 @@ export class App extends Component {
     }
     this._navbar.dispatchComponentDidMount();
 
-    this.updatePageContent();
+    this._router.start();
   }
 }
