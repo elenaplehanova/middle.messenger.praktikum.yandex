@@ -1,1 +1,1 @@
-export { SignIn } from "./SignIn";
+export { ConnectedSignIn as SignIn } from "./SignIn";

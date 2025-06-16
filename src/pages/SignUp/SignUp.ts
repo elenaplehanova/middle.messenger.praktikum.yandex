@@ -10,6 +10,18 @@ import {
   validatePassword,
   validatePhone,
 } from "@/utils/validation";
+import { QueryParams } from "@/services/HTTPTransport";
+import { AuthApi } from "@/api/AuthApi";
+import { App } from "@/components/App";
+
+export interface RegistrationData {
+  first_name: string;
+  second_name: string;
+  login: string;
+  email: string;
+  password: string;
+  phone: string;
+}
 
 export class SignUp extends Component {
   private _button: Button;
@@ -27,9 +39,7 @@ export class SignUp extends Component {
       className: "auth-form__button",
       type: "submit",
     });
-
     super("template", { button });
-
     this._button = button;
   }
   render() {
@@ -46,7 +56,7 @@ export class SignUp extends Component {
     this._button.dispatchComponentDidMount();
   };
 
-  handleSubmit = (e: SubmitEvent) => {
+  handleSubmit = async (e: SubmitEvent) => {
     e.preventDefault();
     const isFirstNameValid = this.validateField(
       this._firstNameInput,
@@ -73,14 +83,35 @@ export class SignUp extends Component {
       isPhoneValid?.isValid;
 
     if (isFormValid) {
-      console.log("form:", {
-        first_name: this._firstNameInput?.value,
-        second_name: this._secondNameInput?.value,
-        login: this._loginInput?.value,
-        email: this._emailInput?.value,
-        password: this._passwordInput?.value,
-        phone: this._phoneInput?.value,
-      });
+      const authApi = new AuthApi();
+
+      const registrationData: QueryParams = {
+        first_name: String(this._firstNameInput?.value),
+        second_name: String(this._secondNameInput?.value),
+        login: String(this._loginInput?.value),
+        email: String(this._emailInput?.value),
+        password: String(this._passwordInput?.value),
+        phone: String(this._phoneInput?.value),
+      };
+
+      // signUpApi.create(registrationData);
+
+      try {
+        const logout = await authApi.logout();
+        console.log("logout", logout);
+
+        const response = await authApi.create(registrationData);
+        console.log("Registration successful:", response);
+
+        App.getRouter().go("/sign-in");
+
+        // или показать сообщение об успешной регистрации
+      } catch (error) {
+        console.error("Registration failed:", error);
+        // Здесь можно показать пользователю сообщение об ошибке
+      }
+
+      // console.log("form:", registrationData);
     } else {
       console.log("form is not valid");
     }

@@ -3,7 +3,7 @@
         {{#each pages}}
         <li class="navbar__list-item">
             <a class="navbar__link {{#if (eq ../currentPage this.path)}}navbar__link_active{{/if}}" href="{{this.path}}"
-                onclick="{{../handleClick this.path}}">
+                data-link="{{this.path}}">
                 {{this.name}}
             </a>
         </li>

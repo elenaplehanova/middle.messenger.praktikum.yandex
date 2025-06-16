@@ -1,1 +1,1 @@
-export { Navbar } from "./Navbar";
+export { ConnectedNavbar as Navbar } from "./Navbar";

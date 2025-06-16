@@ -2,6 +2,10 @@ import "./Navbar.scss";
 import template from "./Navbar.hbs?raw";
 import { Component } from "@/services/Component";
 import { compile } from "handlebars";
+import { App } from "@/components/App";
+import Store from "@/services/Store/Store";
+import { Indexed } from "@/utils/set";
+import { connect } from "@/services/Store/Connect";
 
 interface NavbarProps {
   currentPage?: string;
@@ -9,16 +13,9 @@ interface NavbarProps {
   [key: string]: unknown;
 }
 
-export class Navbar extends Component<NavbarProps> {
+class Navbar extends Component<NavbarProps> {
   constructor(props: NavbarProps = {}) {
     super("template", props);
-  }
-
-  handleClick(path: string) {
-    return (e: Event) => {
-      e.preventDefault();
-      this.props.onNavigate?.(path);
-    };
   }
 
   render() {
@@ -32,7 +29,32 @@ export class Navbar extends Component<NavbarProps> {
         { path: "/page-404", name: "404" },
         { path: "/user-settings", name: "User settings" },
       ],
-      handleClick: this.handleClick.bind(this),
+    });
+  }
+
+  handleClick(e: Event) {
+    e.preventDefault();
+    e.stopPropagation();
+    const target = e.currentTarget as HTMLElement;
+    const path = target.getAttribute("data-link");
+    if (path) {
+      Store.set("currentPage", path);
+      App.getRouter().go(path);
+    }
+  }
+
+  componentDidMount(): void {
+    const links = this.element?.querySelectorAll("a[data-link]");
+    links?.forEach((link) => {
+      link.addEventListener("click", (e) => this.handleClick(e));
     });
   }
 }
+
+const mapStateToProps = (state: Indexed) => {
+  return {
+    currentPage: state.currentPage as string | undefined,
+  };
+};
+
+export const ConnectedNavbar = connect(mapStateToProps)(Navbar);

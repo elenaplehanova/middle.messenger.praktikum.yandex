@@ -4,21 +4,35 @@ import template from "./SignIn.hbs?raw";
 import { Component } from "@/services/Component";
 import { compile } from "handlebars";
 import { validateLogin, validatePassword } from "@/utils/validation";
+import { QueryParams } from "@/services/HTTPTransport";
+import Store from "@/services/Store/Store";
+import { connect } from "@/services/Store/Connect";
+import { App } from "@/components/App";
+import { AuthApi } from "@/api/AuthApi";
 
-export class SignIn extends Component {
+type Indexed<T = unknown> = {
+  [key in string]: T;
+};
+
+interface SignInProps extends Record<string, unknown> {
+  button?: Button;
+  isAuth?: boolean; // это будет приходить из connect
+}
+
+class SignIn extends Component<SignInProps> {
   private _button: Button;
   private _form: HTMLElement | null = null;
   private _loginInput: HTMLInputElement | null = null;
   private _passwordInput: HTMLInputElement | null = null;
 
-  constructor() {
+  constructor(props: SignInProps = {}) {
     const button = new Button({
       text: "Sign in",
       className: "auth-form__button",
       type: "submit",
     });
 
-    super("template", { button });
+    super("template", { ...props, button });
 
     this._button = button;
   }
@@ -37,7 +51,7 @@ export class SignIn extends Component {
     this._button.dispatchComponentDidMount();
   };
 
-  handleSubmit = (e: SubmitEvent) => {
+  handleSubmit = async (e: SubmitEvent) => {
     e.preventDefault();
     const isLoginValid = this.validateField(this._loginInput, validateLogin);
     const isPasswordValid = this.validateField(
@@ -48,6 +62,25 @@ export class SignIn extends Component {
     const isFormValid = isLoginValid?.isValid && isPasswordValid?.isValid;
 
     if (isFormValid) {
+      const authApi = new AuthApi();
+
+      const loginData: QueryParams = {
+        login: String(this._loginInput?.value),
+        password: String(this._passwordInput?.value),
+      };
+
+      try {
+        const response = await authApi.signIn(loginData);
+        console.log("Registration successful:", response);
+
+        const newPath = "/user-settings";
+
+        Store.set("currentPage", newPath);
+        App.getRouter().go(newPath);
+      } catch (error) {
+        console.error("Registration failed:", error);
+      }
+
       console.log("form:", {
         login: this._loginInput?.value,
         password: this._passwordInput?.value,
@@ -87,3 +120,9 @@ export class SignIn extends Component {
     }
   }
 }
+
+const mapSignInState = (state: Indexed) => ({
+  isAuth: state?.user?.isAuth,
+});
+
+export const ConnectedSignIn = connect(mapSignInState)(SignIn);

@@ -1,1 +1,1 @@
-export { UserSettings } from "./UserSettings";
+export { ConnectedUserSettings as UserSettings } from "./UserSettings";

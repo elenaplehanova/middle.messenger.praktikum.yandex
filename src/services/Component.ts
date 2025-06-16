@@ -1,3 +1,4 @@
+import isEqual from "@/utils/isEqual";
 import { EventBus } from "./EventBus";
 
 export type Props<T = unknown> = T & Record<string, unknown>;
@@ -61,9 +62,7 @@ export abstract class Component<
     this.componentDidMount(this._meta.props);
   }
 
-  protected componentDidMount(oldProps?: Props<T>): void {
-    console.log("oldProps", oldProps);
-  }
+  protected componentDidMount(oldProps?: Props<T>): void {}
 
   public dispatchComponentDidMount(): void {
     this.eventBus().emit(Component.EVENTS.FLOW_CDM);
@@ -81,15 +80,25 @@ export abstract class Component<
     oldProps: Props<T>,
     newProps: Props<T>
   ): boolean {
-    console.log("oldProps", oldProps, "newProps", newProps);
-    return true;
+    return !isEqual(oldProps, newProps);
   }
 
-  public setProps(nextProps: Props<T>): void {
-    if (!nextProps) {
-      return;
-    }
+  // setProps(nextProps: Props) {
+  //   if (!nextProps) {
+  //     return;
+  //   }
+  //   this.props = { ...this.props, ...nextProps };
+  //   this._render();
+  // }
+
+  setProps(nextProps: Props) {
+    if (!nextProps) return;
+
+    const oldProps = { ...this.props };
+
     Object.assign(this.props, nextProps);
+
+    this.eventBus().emit(Component.EVENTS.FLOW_CDU, oldProps, this.props);
   }
 
   get element(): HTMLElement | null {
@@ -110,6 +119,12 @@ export abstract class Component<
       }
       this._element.replaceWith(newElement);
       this._element = newElement;
+
+      // 👇 ВАЖНО: вызов renderComponent, если он реализован в дочернем классе
+      const self = this as any;
+      if (typeof self.renderComponent === "function") {
+        self.renderComponent();
+      }
     }
   }
 
@@ -190,4 +205,23 @@ export abstract class Component<
 
     return result;
   };
+
+  addDOMEvents(
+    componentOrElement: Component<any> | HTMLElement | null,
+    events: { type: string; handler: EventListener }[]
+  ) {
+    let el: HTMLElement | null = null;
+
+    if (componentOrElement instanceof Component) {
+      el = componentOrElement.getContent();
+    } else {
+      el = componentOrElement;
+    }
+
+    if (el) {
+      events.forEach(({ type, handler }) => {
+        el!.addEventListener(type, handler);
+      });
+    }
+  }
 }

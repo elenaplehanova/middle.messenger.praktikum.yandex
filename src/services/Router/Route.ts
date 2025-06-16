@@ -1,4 +1,4 @@
-import { Component } from "./Component";
+import { Component } from "../Component";
 
 function render(query: string, block: Component) {
   const root = document.querySelector(query);
@@ -11,7 +11,7 @@ function render(query: string, block: Component) {
     root.innerHTML = "";
     root.appendChild(content);
   }
-  
+
   block.dispatchComponentDidMount();
 
   return root;
@@ -54,6 +54,10 @@ export class Route {
 
   match(pathname: string): boolean {
     return this._pathname === "*" || this._pathname === pathname;
+  }
+
+  public getPathname(): string {
+    return this._pathname;
   }
 
   render() {

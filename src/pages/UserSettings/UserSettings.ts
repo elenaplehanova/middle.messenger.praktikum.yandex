@@ -1,7 +1,7 @@
 import "./UserSettings.scss";
 import { Button } from "@components/Button";
 import template from "./UserSettings.hbs?raw";
-import { Component } from "@/services/Component";
+import { Component, Props } from "@/services/Component";
 import { compile } from "handlebars";
 import {
   validateEmail,
@@ -10,36 +10,31 @@ import {
   validatePassword,
   validatePhone,
 } from "@/utils/validation";
+import { connect } from "@/services/Store/Connect";
+import { Indexed } from "@/utils/set";
+import Store from "@/services/Store/Store";
+import { AuthApi } from "@/api/AuthApi";
+import isEqual from "@/utils/isEqual";
+import { App } from "@/components/App";
 
-export class UserSettings extends Component {
+interface UserData {
+  id?: number;
+  first_name?: string;
+  second_name?: string;
+  display_name?: string;
+  login?: string;
+  email?: string;
+  phone?: string;
+  avatar?: string;
+}
+
+interface UserSettingsProps extends Record<string, unknown> {
+  button?: Button;
+  user?: UserData;
+}
+
+class UserSettings extends Component<UserSettingsProps> {
   private _button: Button;
-
-  constructor() {
-    const button = new Button({
-      text: "Save",
-      className: "user-settings__button",
-      type: "submit",
-    });
-
-    super("template", { button });
-
-    this._button = button;
-  }
-  
-  render() {
-    return compile(template)(this.props);
-  }
-
-  renderComponent = () => {
-    const placeholder = this.element?.querySelector(
-      '[data-component="button"]'
-    );
-    if (placeholder && this._button.getContent()) {
-      placeholder.replaceWith(this._button.getContent()!);
-    }
-    this._button.dispatchComponentDidMount();
-  };
-
   private _form: HTMLElement | null = null;
   private _firstNameInput: HTMLInputElement | null = null;
   private _secondNameInput: HTMLInputElement | null = null;
@@ -52,6 +47,62 @@ export class UserSettings extends Component {
   private _image: HTMLImageElement | null = null;
   private _avatar: HTMLInputElement | null = null;
   private _changePhoto: HTMLButtonElement | null = null;
+  private _logOut: Element | null | undefined;
+
+  constructor(props: UserSettingsProps = {}) {
+    const button = new Button({
+      text: "Save",
+      className: "user-settings__button",
+      type: "submit",
+      // events: {
+      //   click: (e: Event) => {
+      //     this.handleClickSaveButton(e);
+      //   },
+      // },
+    });
+    super("template", { ...props, button });
+    this._button = button;
+  }
+
+  render() {
+    const compiled = compile(template);
+    return compiled(this.props);
+  }
+
+  renderComponent = () => {
+    console.log("update component");
+
+    const placeholder = this.element?.querySelector(
+      '[data-component="button"]'
+    );
+    if (placeholder && this._button.getContent()) {
+      placeholder.replaceWith(this._button.getContent()!);
+
+      this.addDOMEvents(this._button, [
+        {
+          type: "click",
+          handler: (e: Event) => {
+            e.preventDefault();
+            console.log("Button clicked via addDOMEvents");
+          },
+        },
+      ]);
+    }
+    this._button.dispatchComponentDidMount();
+  };
+
+  handleClickSaveButton = (e: Event) => {
+    e.preventDefault();
+    console.log("Button clicked");
+  };
+
+  getUserData = async () => {
+    const authApi = new AuthApi();
+    const userData = await authApi.getUser();
+    if (userData) {
+      Store.set("user", { ...userData, isAuth: true });
+    }
+  };
 
   handleSubmit = (e: SubmitEvent) => {
     e.preventDefault();
@@ -137,7 +188,18 @@ export class UserSettings extends Component {
     this.validateField(this._newPasswordInput, validatePassword);
   };
 
-  componentDidMount() {
+  handleClickLink = async (e: Event) => {
+    e.preventDefault();
+    const authApi = new AuthApi();
+    try {
+      await authApi.logout();
+      App.getRouter().go("/sign-in");
+    } catch (error) {
+      console.dir(error);
+    }
+  };
+
+  addEvent = () => {
     this.renderComponent();
     if (this.element) {
       this._form = this.element.querySelector(".user-settings__form");
@@ -159,72 +221,75 @@ export class UserSettings extends Component {
       this._changePhoto =
         this.element.querySelector<HTMLButtonElement>("#changePhoto");
 
+      this._logOut = this.element.querySelector("#logOut");
+      if (this._logOut) {
+        this._logOut.addEventListener("click", this.handleClickLink);
+      }
+
       if (this._form) {
         this._form.addEventListener("submit", this.handleSubmit);
       }
 
-      if (this._firstNameInput) {
-        this._firstNameInput.addEventListener("blur", this.handleFirstNameBlur);
-      }
-
-      if (this._secondNameInput) {
-        this._secondNameInput.addEventListener(
-          "blur",
-          this.handleSecondNameBlur
-        );
-      }
-
-      if (this._displayNameInput) {
-        this._displayNameInput.addEventListener(
-          "blur",
-          this.handleDisplayNameBlur
-        );
-      }
-
-      if (this._loginInput) {
-        this._loginInput.addEventListener("blur", this.handleLoginBlur);
-      }
-
-      if (this._emailInput) {
-        this._emailInput.addEventListener("blur", this.handleEmailBlur);
-      }
-
-      if (this._phoneInput) {
-        this._phoneInput.addEventListener("blur", this.handlePhoneBlur);
-      }
-
-      if (this._oldPasswordInput) {
-        this._oldPasswordInput.addEventListener(
-          "blur",
-          this.handleOldPasswordBlur
-        );
-      }
-
-      if (this._newPasswordInput) {
-        this._newPasswordInput.addEventListener(
-          "blur",
-          this.handleNewPasswordBlur
-        );
-      }
-
-      if (this._changePhoto) {
-        this._changePhoto.addEventListener("click", () => {
-          if (this._avatar) {
-            this._avatar.click();
-          }
-        });
-      }
-      if (this._avatar) {
-        this._avatar.addEventListener("change", () => {
-          if (this._avatar?.files) {
-            if (this._avatar?.files?.length > 0) {
-              if (this._image) {
-                this._image.src = URL.createObjectURL(this._avatar.files[0]);
-              }
+      this._firstNameInput?.addEventListener("blur", this.handleFirstNameBlur);
+      this._secondNameInput?.addEventListener(
+        "blur",
+        this.handleSecondNameBlur
+      );
+      this._displayNameInput?.addEventListener(
+        "blur",
+        this.handleDisplayNameBlur
+      );
+      this._loginInput?.addEventListener("blur", this.handleLoginBlur);
+      this._emailInput?.addEventListener("blur", this.handleEmailBlur);
+      this._phoneInput?.addEventListener("blur", this.handlePhoneBlur);
+      this._oldPasswordInput?.addEventListener(
+        "blur",
+        this.handleOldPasswordBlur
+      );
+      this._newPasswordInput?.addEventListener(
+        "blur",
+        this.handleNewPasswordBlur
+      );
+      this._changePhoto?.addEventListener("click", () => {
+        if (this._avatar) {
+          this._avatar.click();
+        }
+      });
+      this._avatar?.addEventListener("change", () => {
+        if (this._avatar?.files) {
+          if (this._avatar?.files?.length > 0) {
+            if (this._image) {
+              this._image.src = URL.createObjectURL(this._avatar.files[0]);
             }
           }
-        });
-      }
+        }
+      });
+    }
+  };
+
+  componentDidMount() {
+    this.addEvent();
+    if (!this.props.user) {
+      this.getUserData();
     }
   }
+
+  protected componentDidUpdate(
+    oldProps: Props<UserSettingsProps>,
+    newProps: Props<UserSettingsProps>
+  ): boolean {
+    const hasChanges = !isEqual(oldProps, newProps);
+    if (hasChanges) {
+      this.addEvent();
+    }
+    return hasChanges;
+  }
 }
+
+const mapStateToProps = (state: Indexed) => {
+  return {
+    user: state.user as UserData | undefined,
+  };
+};
+
+export const ConnectedUserSettings = connect(mapStateToProps)(UserSettings);

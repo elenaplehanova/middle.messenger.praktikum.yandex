@@ -7,7 +7,8 @@ import { UserSettings } from "@/pages/UserSettings";
 import { Messenger } from "@/pages/Messenger";
 import { Navbar } from "@components/Navbar";
 import { ErrorPage } from "@/pages/ErrorPage";
-import { Router } from "@/services/Router";
+import { Router } from "@/services/Router/Router";
+import Store from "@/services/Store/Store";
 
 class Page404 extends ErrorPage {
   constructor() {
@@ -22,30 +23,27 @@ class Page500 extends ErrorPage {
 
 export class App extends Component {
   private _navbar: Navbar;
-  private _router: Router;
+  private static _router: Router;
 
   constructor() {
     const initialPath = window.location.pathname;
     const navbar = new Navbar({
       currentPage: initialPath,
     });
-
     super("template", { navbar });
-
     this._navbar = navbar;
-    this._router = new Router("#router");
-
-    this.setupRouting();
+    Store.set("currentPage", initialPath);
   }
 
   private setupRouting() {
-    this._router
+    App._router
       .use("/", Messenger)
       .use("/sign-in", SignIn)
       .use("/sign-up", SignUp)
       .use("/user-settings", UserSettings)
       .use("/page-500", Page500)
-      .use("*", Page404);
+      .use("*", Page404)
+      .start();
   }
 
   render() {
@@ -61,6 +59,13 @@ export class App extends Component {
     }
     this._navbar.dispatchComponentDidMount();
 
-    this._router.start();
+    if (!App._router) {
+      App._router = new Router("#router");
+      this.setupRouting();
+    }
+  }
+
+  public static getRouter(): Router {
+    return App._router;
   }
 }

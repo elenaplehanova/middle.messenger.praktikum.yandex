@@ -10,20 +10,35 @@ type HTTPMethod = <R = unknown>(
   options?: Partial<RequestOptions<QueryParams>>
 ) => Promise<R>;
 
-type QueryParams = Record<string, string | number | boolean>;
+export type QueryParams = Record<string, string | number | boolean>;
 
-type RequestOptions<T = QueryParams> = {
+type RequestOptions<T = unknown> = {
   headers?: Record<string, string>;
   method?: METHODS;
   data?: T;
   timeout?: number;
+  withCredentials?: boolean;
 };
 
 export class HTTPTransport {
+  private defaultOptions: RequestOptions = {
+    withCredentials: true,
+    headers: {
+      "Content-Type": "application/json",
+    },
+    timeout: 5000,
+  };
+
+  private onUnauthorized?: () => void;
+
   get: HTTPMethod = this.createMethod(METHODS.GET);
   post: HTTPMethod = this.createMethod(METHODS.POST);
   put: HTTPMethod = this.createMethod(METHODS.PUT);
   delete: HTTPMethod = this.createMethod(METHODS.DELETE);
+
+  setUnauthorizedHandler(handler: () => void) {
+    this.onUnauthorized = handler;
+  }
 
   private queryStringify(
     data: Record<string, string | number | boolean>
@@ -60,7 +75,22 @@ export class HTTPTransport {
     url: string,
     options: RequestOptions<QueryParams> = {}
   ): Promise<XMLHttpRequest> {
-    const { headers = {}, method, data, timeout = 5000 } = options;
+    // Объединяем дефолтные настройки с переданными
+    const mergedOptions: RequestOptions = {
+      ...this.defaultOptions,
+      ...options,
+      headers: {
+        ...this.defaultOptions.headers,
+        ...options.headers,
+      },
+    };
+    const {
+      headers = {},
+      method,
+      data,
+      timeout = 5000,
+      withCredentials,
+    } = mergedOptions;
 
     return new Promise((resolve, reject) => {
       if (!method) {
@@ -77,12 +107,20 @@ export class HTTPTransport {
       } else {
         xhr.open(method, url);
       }
+      xhr.withCredentials = withCredentials ?? true;
 
       Object.keys(headers).forEach((key) => {
         xhr.setRequestHeader(key, headers[key]);
       });
 
-      xhr.onload = () => resolve(xhr);
+      xhr.onload = () => {
+        if (xhr.status === 401) {
+          this.onUnauthorized?.();
+          reject(new Error("Unauthorized (401)"));
+          return;
+        }
+        resolve(xhr);
+      };
       xhr.onabort = () => reject(new Error("Request aborted"));
       xhr.onerror = () => reject(new Error("Request failed"));
       xhr.ontimeout = () => reject(new Error("Request timeout"));

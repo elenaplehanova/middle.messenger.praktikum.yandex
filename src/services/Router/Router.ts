@@ -1,5 +1,6 @@
-import { Component } from "./Component";
+import { Component } from "../Component";
 import { Route } from "./Route";
+import Store from "@/services/Store/Store";
 
 export class Router {
   private static __instance: Router;
@@ -47,11 +48,16 @@ export class Router {
       this._currentRoute.leave();
     }
 
+    Store.set("currentPage", pathname);
+
     this._currentRoute = route;
     route.render();
   }
 
   public go(pathname: string) {
+    if (pathname === this._currentRoute?.getPathname()) {
+      return;
+    }
     this.history.pushState({}, "", pathname);
     this._onRoute(pathname);
   }
