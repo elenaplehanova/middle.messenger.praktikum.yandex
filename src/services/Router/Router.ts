@@ -1,6 +1,5 @@
 import { Component } from "../Component";
 import { Route } from "./Route";
-import Store from "@/services/Store/Store";
 
 export class Router {
   private static __instance: Router;
@@ -22,21 +21,21 @@ export class Router {
     Router.__instance = this;
   }
 
-  public use(pathname: string, block: new () => Component) {
+  public use = (pathname: string, block: new () => Component) => {
     const route = new Route(pathname, block, { rootQuery: this._rootQuery });
     this.routes.push(route);
     return this;
-  }
+  };
 
-  public start() {
+  public start = () => {
     window.onpopstate = (event: PopStateEvent) => {
       const target = event.currentTarget as Window;
       this._onRoute(target?.location.pathname || "/");
     };
     this._onRoute(window.location.pathname);
-  }
+  };
 
-  private _onRoute(pathname: string) {
+  private _onRoute = (pathname: string) => {
     const route = this.getRoute(pathname);
 
     if (!route) {
@@ -48,32 +47,30 @@ export class Router {
       this._currentRoute.leave();
     }
 
-    Store.set("currentPage", pathname);
-
     this._currentRoute = route;
     route.render();
-  }
+  };
 
-  public go(pathname: string) {
+  public go = (pathname: string) => {
     if (pathname === this._currentRoute?.getPathname()) {
       return;
     }
     this.history.pushState({}, "", pathname);
     this._onRoute(pathname);
-  }
+  };
 
-  public back() {
+  public back = () => {
     this.history.back();
-  }
+  };
 
-  public forward() {
+  public forward = () => {
     this.history.forward();
-  }
+  };
 
-  public getRoute(pathname: string) {
+  public getRoute = (pathname: string) => {
     return (
       this.routes.find((route) => route.match(pathname)) ||
       this.routes.find((route) => route.match("*"))
     );
-  }
+  };
 }

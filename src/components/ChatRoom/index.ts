@@ -1,1 +1,1 @@
-export { ChatRoom } from "./ChatRoom";
+export { ConnectedChatRoom as ChatRoom } from "./ChatRoom";

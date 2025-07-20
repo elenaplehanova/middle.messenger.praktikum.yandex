@@ -3,45 +3,42 @@ import template from "./Navbar.hbs?raw";
 import { Component } from "@/services/Component";
 import { compile } from "handlebars";
 import { App } from "@/components/App";
-import Store from "@/services/Store/Store";
-import { Indexed } from "@/utils/set";
-import { connect } from "@/services/Store/Connect";
+import RoutePaths from "@/services/Router/RoutePaths";
 
 interface NavbarProps {
-  currentPage?: string;
-  onNavigate?: (path: string) => void;
   [key: string]: unknown;
 }
 
-class Navbar extends Component<NavbarProps> {
+export class Navbar extends Component<NavbarProps> {
   constructor(props: NavbarProps = {}) {
     super("template", props);
   }
 
   render() {
+    const currentPage = window.location.pathname;
     return compile(template)({
       ...this.props,
+      currentPage,
       pages: [
-        { path: "/", name: "Messenger" },
-        { path: "/sign-in", name: "Sign in" },
-        { path: "/sign-up", name: "Sign up" },
-        { path: "/page-500", name: "500" },
-        { path: "/page-404", name: "404" },
-        { path: "/user-settings", name: "User settings" },
+        { path: RoutePaths.Messenger, name: "Messenger" },
+        { path: RoutePaths.SignIn, name: "Sign in" },
+        { path: RoutePaths.SignUp, name: "Sign up" },
+        { path: RoutePaths.UserSettings, name: "User settings" },
+        { path: RoutePaths.Page500, name: "500" },
+        { path: RoutePaths.NotFound, name: "404" },
       ],
     });
   }
 
-  handleClick(e: Event) {
+  handleClick = (e: Event) => {
     e.preventDefault();
     e.stopPropagation();
     const target = e.currentTarget as HTMLElement;
     const path = target.getAttribute("data-link");
     if (path) {
-      Store.set("currentPage", path);
       App.getRouter().go(path);
     }
-  }
+  };
 
   componentDidMount(): void {
     const links = this.element?.querySelectorAll("a[data-link]");
@@ -50,11 +47,3 @@ class Navbar extends Component<NavbarProps> {
     });
   }
 }
-
-const mapStateToProps = (state: Indexed) => {
-  return {
-    currentPage: state.currentPage as string | undefined,
-  };
-};
-
-export const ConnectedNavbar = connect(mapStateToProps)(Navbar);

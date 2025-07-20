@@ -44,6 +44,7 @@
   &__button {
     display: block;
     margin: auto;
+    margin-top: 20px;
   }
 
   &__hidden-input {
@@ -65,5 +66,12 @@
     &:hover {
       color: var(--violet-dark, black);
     }
+  }
+  &__password-toggle {
+    margin-top: 20px;
+  }
+  &__toggle-label {
+    cursor: pointer;
+    color: var(--text-color);
   }
 }

@@ -11,8 +11,9 @@ import {
   validatePhone,
 } from "@/utils/validation";
 import { QueryParams } from "@/services/HTTPTransport";
-import { AuthApi } from "@/api/AuthApi";
 import { App } from "@/components/App";
+import RoutePaths from "@/services/Router/RoutePaths";
+import { authApi } from "@/api/AuthApi";
 
 export interface RegistrationData {
   first_name: string;
@@ -32,6 +33,7 @@ export class SignUp extends Component {
   private _emailInput: HTMLInputElement | null = null;
   private _passwordInput: HTMLInputElement | null = null;
   private _phoneInput: HTMLInputElement | null = null;
+  private _signIn: HTMLInputElement | null = null;
 
   constructor() {
     const button = new Button({
@@ -83,8 +85,6 @@ export class SignUp extends Component {
       isPhoneValid?.isValid;
 
     if (isFormValid) {
-      const authApi = new AuthApi();
-
       const registrationData: QueryParams = {
         first_name: String(this._firstNameInput?.value),
         second_name: String(this._secondNameInput?.value),
@@ -94,26 +94,14 @@ export class SignUp extends Component {
         phone: String(this._phoneInput?.value),
       };
 
-      // signUpApi.create(registrationData);
-
       try {
-        const logout = await authApi.logout();
-        console.log("logout", logout);
-
         const response = await authApi.create(registrationData);
-        console.log("Registration successful:", response);
-
-        App.getRouter().go("/sign-in");
-
-        // или показать сообщение об успешной регистрации
+        App.getRouter().go(RoutePaths.SignIn);
       } catch (error) {
-        console.error("Registration failed:", error);
-        // Здесь можно показать пользователю сообщение об ошибке
+        console.dir("Registration failed:", error);
       }
-
-      // console.log("form:", registrationData);
     } else {
-      console.log("form is not valid");
+      console.dir("form is not valid");
     }
   };
 
@@ -141,50 +129,55 @@ export class SignUp extends Component {
     this.validateField(this._phoneInput, validatePhone);
   };
 
+  handleClickSignIn = async (e: Event) => {
+    e.preventDefault();
+    App.getRouter().go(RoutePaths.SignIn);
+  };
+
+  findElements(): void {
+    if (!this.element) return;
+
+    this._form = this.element.querySelector(".auth-form__form");
+    this._firstNameInput =
+      this.element.querySelector<HTMLInputElement>("#first_name");
+    this._secondNameInput =
+      this.element.querySelector<HTMLInputElement>("#second_name");
+    this._loginInput = this.element.querySelector<HTMLInputElement>("#login");
+    this._emailInput = this.element.querySelector<HTMLInputElement>("#email");
+    this._passwordInput =
+      this.element.querySelector<HTMLInputElement>("#password");
+    this._phoneInput = this.element.querySelector<HTMLInputElement>("#phone");
+    this._signIn = this.element.querySelector("#sign-in");
+  }
+
+  bindElements(): void {
+    this._form?.addEventListener("submit", this.handleSubmit);
+    this._firstNameInput?.addEventListener("blur", this.handleFirstNameBlur);
+    this._secondNameInput?.addEventListener("blur", this.handleSecondNameBlur);
+    this._loginInput?.addEventListener("blur", this.handleLoginBlur);
+    this._emailInput?.addEventListener("blur", this.handleEmailBlur);
+    this._passwordInput?.addEventListener("blur", this.handlePasswordBlur);
+    this._phoneInput?.addEventListener("blur", this.handlePhoneBlur);
+    this._signIn?.addEventListener("click", this.handleClickSignIn);
+  }
+
+  unbindElements(): void {
+    this._form?.removeEventListener("submit", this.handleSubmit);
+    this._firstNameInput?.removeEventListener("blur", this.handleFirstNameBlur);
+    this._secondNameInput?.removeEventListener(
+      "blur",
+      this.handleSecondNameBlur
+    );
+    this._loginInput?.removeEventListener("blur", this.handleLoginBlur);
+    this._emailInput?.removeEventListener("blur", this.handleEmailBlur);
+    this._passwordInput?.removeEventListener("blur", this.handlePasswordBlur);
+    this._phoneInput?.removeEventListener("blur", this.handlePhoneBlur);
+    this._signIn?.removeEventListener("click", this.handleClickSignIn);
+  }
+
   componentDidMount() {
     this.renderComponent();
-    if (this.element) {
-      this._form = this.element.querySelector(".auth-form__form");
-      this._firstNameInput =
-        this.element.querySelector<HTMLInputElement>("#first_name");
-      this._secondNameInput =
-        this.element.querySelector<HTMLInputElement>("#second_name");
-      this._loginInput = this.element.querySelector<HTMLInputElement>("#login");
-      this._emailInput = this.element.querySelector<HTMLInputElement>("#email");
-      this._passwordInput =
-        this.element.querySelector<HTMLInputElement>("#password");
-      this._phoneInput = this.element.querySelector<HTMLInputElement>("#phone");
-
-      if (this._form) {
-        this._form.addEventListener("submit", this.handleSubmit);
-      }
-
-      if (this._firstNameInput) {
-        this._firstNameInput.addEventListener("blur", this.handleFirstNameBlur);
-      }
-
-      if (this._secondNameInput) {
-        this._secondNameInput.addEventListener(
-          "blur",
-          this.handleSecondNameBlur
-        );
-      }
-
-      if (this._loginInput) {
-        this._loginInput.addEventListener("blur", this.handleLoginBlur);
-      }
-
-      if (this._emailInput) {
-        this._emailInput.addEventListener("blur", this.handleEmailBlur);
-      }
-
-      if (this._passwordInput) {
-        this._passwordInput.addEventListener("blur", this.handlePasswordBlur);
-      }
-
-      if (this._phoneInput) {
-        this._phoneInput.addEventListener("blur", this.handlePhoneBlur);
-      }
-    }
+    this.findElements();
+    this.bindElements();
   }
 }

@@ -7,7 +7,7 @@ export abstract class BaseAPI {
     throw new Error("Not implemented");
   }
 
-  request(): never {
+  request(): Promise<unknown> {
     throw new Error("Not implemented");
   }
 
@@ -15,7 +15,7 @@ export abstract class BaseAPI {
     throw new Error("Not implemented");
   }
 
-  delete(): never {
+  delete(_data: QueryParams): Promise<unknown> {
     throw new Error("Not implemented");
   }
 }

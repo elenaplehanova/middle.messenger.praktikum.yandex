@@ -23,6 +23,7 @@ export default defineConfig({
       "@": path.resolve(__dirname, "src"),
       "@styles": path.resolve(__dirname, "src/styles"),
       "@components": path.resolve(__dirname, "src/components"),
+      "@router": path.resolve(__dirname, "src/services/Router"),
     },
   },
   css: {

@@ -7,7 +7,6 @@ export type MessageProps = {
   text: string;
   datetime: Date;
   formatDatetime?: string;
-  senderName: string;
   isMine?: boolean;
 };
 

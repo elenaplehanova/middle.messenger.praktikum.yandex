@@ -5,10 +5,10 @@ import { Component } from "@/services/Component";
 import { compile } from "handlebars";
 import { validateLogin, validatePassword } from "@/utils/validation";
 import { QueryParams } from "@/services/HTTPTransport";
-import Store from "@/services/Store/Store";
 import { connect } from "@/services/Store/Connect";
 import { App } from "@/components/App";
-import { AuthApi } from "@/api/AuthApi";
+import RoutePaths from "@/services/Router/RoutePaths";
+import { authApi } from "@/api/AuthApi";
 
 type Indexed<T = unknown> = {
   [key in string]: T;
@@ -16,7 +16,7 @@ type Indexed<T = unknown> = {
 
 interface SignInProps extends Record<string, unknown> {
   button?: Button;
-  isAuth?: boolean; // это будет приходить из connect
+  isAuth?: boolean;
 }
 
 class SignIn extends Component<SignInProps> {
@@ -24,6 +24,7 @@ class SignIn extends Component<SignInProps> {
   private _form: HTMLElement | null = null;
   private _loginInput: HTMLInputElement | null = null;
   private _passwordInput: HTMLInputElement | null = null;
+  private _signUp: HTMLInputElement | null = null;
 
   constructor(props: SignInProps = {}) {
     const button = new Button({
@@ -62,8 +63,6 @@ class SignIn extends Component<SignInProps> {
     const isFormValid = isLoginValid?.isValid && isPasswordValid?.isValid;
 
     if (isFormValid) {
-      const authApi = new AuthApi();
-
       const loginData: QueryParams = {
         login: String(this._loginInput?.value),
         password: String(this._passwordInput?.value),
@@ -71,22 +70,12 @@ class SignIn extends Component<SignInProps> {
 
       try {
         const response = await authApi.signIn(loginData);
-        console.log("Registration successful:", response);
-
-        const newPath = "/user-settings";
-
-        Store.set("currentPage", newPath);
-        App.getRouter().go(newPath);
+        App.getRouter().go(RoutePaths.Messenger);
       } catch (error) {
         console.error("Registration failed:", error);
       }
-
-      console.log("form:", {
-        login: this._loginInput?.value,
-        password: this._passwordInput?.value,
-      });
     } else {
-      console.log("form is not valid");
+      console.dir("form is not valid");
     }
   };
 
@@ -98,26 +87,39 @@ class SignIn extends Component<SignInProps> {
     this.validateField(this._passwordInput, validatePassword);
   };
 
+  handleClickSignUp = async (e: Event) => {
+    e.preventDefault();
+    App.getRouter().go(RoutePaths.SignUp);
+  };
+
+  findElements(): void {
+    if (!this.element) return;
+
+    this._form = this.element.querySelector(".auth-form__form");
+    this._loginInput = this.element.querySelector<HTMLInputElement>("#login");
+    this._passwordInput =
+      this.element.querySelector<HTMLInputElement>("#password");
+    this._signUp = this.element.querySelector("#sign-up");
+  }
+
+  bindElements(): void {
+    this._form?.addEventListener("submit", this.handleSubmit);
+    this._loginInput?.addEventListener("blur", this.handleLoginBlur);
+    this._passwordInput?.addEventListener("blur", this.handlePasswordBlur);
+    this._signUp?.addEventListener("click", this.handleClickSignUp);
+  }
+
+  unbindElements(): void {
+    this._form?.removeEventListener("submit", this.handleSubmit);
+    this._loginInput?.removeEventListener("blur", this.handleLoginBlur);
+    this._passwordInput?.removeEventListener("blur", this.handlePasswordBlur);
+    this._signUp?.removeEventListener("click", this.handleClickSignUp);
+  }
+
   componentDidMount() {
     this.renderComponent();
-    if (this.element) {
-      this._form = this.element.querySelector(".auth-form__form");
-      this._loginInput = this.element.querySelector<HTMLInputElement>("#login");
-      this._passwordInput =
-        this.element.querySelector<HTMLInputElement>("#password");
-
-      if (this._form) {
-        this._form.addEventListener("submit", this.handleSubmit);
-      }
-
-      if (this._loginInput) {
-        this._loginInput.addEventListener("blur", this.handleLoginBlur);
-      }
-
-      if (this._passwordInput) {
-        this._passwordInput.addEventListener("blur", this.handlePasswordBlur);
-      }
-    }
+    this.findElements();
+    this.bindElements();
   }
 }
 

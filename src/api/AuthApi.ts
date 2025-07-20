@@ -24,4 +24,4 @@ export class AuthApi extends BaseAPI {
   }
 }
 
-// export const authApi = new AuthApi();
+export const authApi = new AuthApi();

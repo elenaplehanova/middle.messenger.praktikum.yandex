@@ -2,12 +2,17 @@
     <h2 class="title chat__title">Chats</h2>
     <div class="chat__container">
         {{#each chats}}
-        <article class="chat__item {{#if isActive}}chat__item_active{{/if}}" data-id="{{id}}">
+        <article class="chat__item {{#if (eq ../currentChatId id)}}chat__item_active{{/if}}" data-id="{{id}}">
             <div class="photo chat__photo"></div>
-            <p class="chat__user-name">{{userName}}</p>
-            <p class="chat__user-message">{{lastMessage}}</p>
+            <p class="chat__user-name">{{title}}</p>
+            <p class="chat__user-message">{{last_message.content}}</p>
+            <button class="button chat__button" id="delete-button">✖</button>
         </article>
         {{/each}}
     </div>
-    <a class="link chat__link" href="user-settings">User settings</a>
+    <div class="chat__button-panel">
+        <div data-component="button"></div>
+        <a class="link chat__link" href="settings" id="user-settings">User settings</a>
+    </div>
+    <div data-component="add-user"></div>
 </div>

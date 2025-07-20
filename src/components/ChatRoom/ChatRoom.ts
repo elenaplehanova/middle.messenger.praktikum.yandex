@@ -1,62 +1,43 @@
 import "./ChatRoom.scss";
 import template from "./ChatRoom.hbs?raw";
 import { compile } from "handlebars";
-import { Component } from "@/services/Component";
+import { Component, Props } from "@/services/Component";
 import { Button } from "@components/Button";
 import { validateMessage } from "@/utils/validation";
 import type { MessageProps } from "../MessageBlock";
 import { MessageBlock } from "../MessageBlock";
 import { formatTime } from "@/utils/formatData";
+import { Indexed } from "@/utils/set";
+import { connect } from "@/services/Store/Connect";
+import { ChatData } from "../Chat/Chat";
+import { chatsApi } from "@/api/ChatsApi";
+import isEqual from "@/utils/isEqual";
+import { WebSocketClient } from "@/services/WebSocketClient";
+import Store from "@/services/Store/Store";
+import { UserData } from "@/pages/UserSettings/UserSettings";
+import { authApi } from "@/api/AuthApi";
 
 interface ChatRoomProps {
-  activeUserName?: string;
+  user?: UserData;
+  currentChat?: ChatData;
+  currentChatId?: number;
   [key: string]: unknown;
 }
 
-export class ChatRoom extends Component {
+class ChatRoom extends Component<ChatRoomProps> {
   private _button: Button;
   private _form: HTMLElement | null = null;
   private _messageInput: HTMLInputElement | null = null;
-  private _yourSenderName = "Вы";
-  private _activeUser = "Lida";
-  private _messagesByUser: Record<string, MessageProps[]> = {
-    Lida: [
-      {
-        text: "У коллеги в чате gpt по подписке я сгенерила эту фотку, правда у Киры получилось три руки )))",
-        datetime: new Date("2025-04-27T19:16:53.383Z"),
-        senderName: "Lida",
-      },
-      {
-        text: "ахах понятно) прикольно",
-        datetime: new Date("2025-04-27T19:16:56.250Z"),
-        senderName: this._yourSenderName,
-      },
-    ],
-    "John )))": [
-      {
-        text: "ok",
-        datetime: new Date("2025-04-27T18:00:00.000Z"),
-        senderName: "John )))",
-      },
-    ],
-    Maya: [
-      {
-        text: "да.. бывает..",
-        datetime: new Date("2025-04-27T17:00:00.000Z"),
-        senderName: "Maya",
-      },
-    ],
-  };
+  private _client: WebSocketClient | null = null;
+  private _messagesByChat: Record<number, MessageProps[]> = {};
 
-  constructor(props: ChatRoomProps) {
+  constructor(props: ChatRoomProps = {}) {
     const button = new Button({
       text: "Send",
       className: "chat-room__button",
       type: "submit",
     });
-
     super("template", { ...props, button });
-
     this._button = button;
   }
 
@@ -74,17 +55,6 @@ export class ChatRoom extends Component {
     this._button.dispatchComponentDidMount();
   };
 
-  override setProps(nextProps: ChatRoomProps) {
-    const prevUser = this.props.activeUserName;
-    super.setProps(nextProps);
-
-    if (nextProps.activeUserName && nextProps.activeUserName !== prevUser) {
-      this._activeUser = nextProps.activeUserName;
-      this.renderMessages();
-      this.renderComponent();
-    }
-  }
-
   handleSubmit = (e: SubmitEvent) => {
     e.preventDefault();
     const isMessageValid = this.validateField(
@@ -93,24 +63,11 @@ export class ChatRoom extends Component {
     );
 
     if (isMessageValid?.isValid && this._messageInput) {
-      const newMessage: MessageProps = {
-        text: this._messageInput.value,
-        datetime: new Date(),
-        senderName: this._yourSenderName,
-      };
-
-      if (!this._messagesByUser[this._activeUser]) {
-        this._messagesByUser[this._activeUser] = [];
-      }
-      this._messagesByUser[this._activeUser].push(newMessage);
+      this._client?.sendMessage(this._messageInput.value);
       this.renderMessages();
-
-      console.log("form:", {
-        message: this._messageInput.value,
-      });
       this._messageInput.value = "";
     } else {
-      console.log("form is not valid");
+      console.dir("form is not valid");
     }
   };
 
@@ -119,26 +76,23 @@ export class ChatRoom extends Component {
   };
 
   renderMessages() {
+    const currentId = this.props.currentChatId!;
     const messagesContainer = this.element?.querySelector(
       ".chat-room__container"
     );
     if (!messagesContainer) return;
 
     messagesContainer.innerHTML = "";
+    const messages = this._messagesByChat[currentId] || [];
 
-    const messages = this._messagesByUser[this._activeUser] || [];
-
-    messages.forEach((msgData) => {
-      const isMine = msgData.senderName === this._yourSenderName;
-
+    messages.forEach((messageItem) => {
       const message = new MessageBlock({
-        ...msgData,
+        ...messageItem,
         datetime:
-          msgData.datetime instanceof Date
-            ? msgData.datetime
-            : new Date(msgData.datetime),
-        formatDatetime: formatTime(msgData.datetime),
-        isMine,
+          messageItem.datetime instanceof Date
+            ? messageItem.datetime
+            : new Date(messageItem.datetime),
+        formatDatetime: formatTime(messageItem.datetime),
       });
 
       if (message.getContent()) {
@@ -149,19 +103,114 @@ export class ChatRoom extends Component {
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
   }
 
+  findElements = (): void => {
+    if (!this.element) return;
+
+    this._form = this.element.querySelector(".chat-room__message-panel");
+    this._messageInput =
+      this.element.querySelector<HTMLInputElement>("#message");
+  };
+
+  bindElements = (): void => {
+    this._form?.addEventListener("submit", this.handleSubmit);
+    this._messageInput?.addEventListener("blur", this.handleMessageBlur);
+  };
+
+  unbindElements = (): void => {
+    this._form?.removeEventListener("submit", this.handleSubmit);
+    this._messageInput?.removeEventListener("blur", this.handleMessageBlur);
+  };
+
+  startChat = async () => {
+    const currentId = this.props.currentChatId;
+    if (this._client) {
+      this._client.close();
+    }
+    const currentUser = this.props.user;
+    if (!currentUser) {
+      const userData = await authApi.getUser();
+      if (userData) {
+        Store.set("user", { ...userData, isAuth: true });
+      }
+    }
+    const chatId = this.props.currentChatId;
+    if (chatId && Array.isArray(this.props.chats) && currentId) {
+      const token = await chatsApi.getToken(chatId);
+
+      if (token && currentUser?.id) {
+        this._client = new WebSocketClient(
+          `wss://ya-praktikum.tech/ws/chats/${currentUser?.id}/${chatId}/${token.token}`
+        );
+
+        this._client.onOpen(() => {
+          this._client?.getMessages();
+        });
+
+        this._client.onMessage((data) => {
+          const parsed = JSON.parse(data);
+          if (Array.isArray(parsed)) {
+            this._messagesByChat[currentId] = [];
+            parsed
+              .sort(
+                (a, b) =>
+                  new Date(a.time).getTime() - new Date(b.time).getTime()
+              )
+              .forEach((msg) => this.addMessageFromSocket(msg));
+          } else if (parsed.type === "message") {
+            this.addMessageFromSocket(parsed);
+          }
+        });
+      }
+    }
+  };
+
+  addMessageFromSocket(message: any) {
+    const currentId = this.props.currentChatId!;
+    const newMessage: MessageProps = {
+      text: message.content,
+      datetime: new Date(message.time),
+      isMine: message.user_id === this.props.user?.id,
+    };
+
+    if (!this._messagesByChat[currentId]) {
+      this._messagesByChat[currentId] = [];
+    }
+
+    this._messagesByChat[currentId].push(newMessage);
+    this.renderMessages();
+  }
+
   componentDidMount() {
-    this.renderComponent();
-    if (this.element) {
-      this._form = this.element.querySelector(".chat-room__message-panel");
-      this._messageInput =
-        this.element.querySelector<HTMLInputElement>("#message");
-      if (this._form) {
-        this._form.addEventListener("submit", this.handleSubmit);
-      }
-      if (this._messageInput) {
-        this._messageInput.addEventListener("blur", this.handleMessageBlur);
-      }
-      this.renderMessages();
+    if (this.props.currentChatId) {
+      this.renderComponent();
+      this.findElements();
+      this.bindElements();
     }
   }
+
+  protected componentDidUpdate(
+    oldProps: Props<ChatRoomProps>,
+    newProps: Props<ChatRoomProps>
+  ): boolean {
+    const res = !isEqual(oldProps, newProps);
+    if (res) {
+      (async () => await this.startChat())();
+    }
+    return res;
+  }
 }
+
+const mapStateToProps = (state: Indexed) => {
+  const chats = state.chats as ChatData[] | undefined;
+  const currentChatId = state.currentChatId as number | null;
+  const currentChat = chats?.find((chat) => chat.id === currentChatId);
+
+  return {
+    chats,
+    currentChatId,
+    currentChat,
+    user: state.user as UserData | null,
+  };
+};
+
+export const ConnectedChatRoom = connect(mapStateToProps)(ChatRoom);

@@ -4,7 +4,7 @@ import HTTPTransport from "@/services/HTTPTransport";
 const api = new HTTPTransport();
 
 api.setUnauthorizedHandler(() => {
-  App.getRouter().go("/sign-in");
+  App.getRouter().go("/");
 });
 
 export default api;

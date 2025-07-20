@@ -8,7 +8,7 @@ import { Messenger } from "@/pages/Messenger";
 import { Navbar } from "@components/Navbar";
 import { ErrorPage } from "@/pages/ErrorPage";
 import { Router } from "@/services/Router/Router";
-import Store from "@/services/Store/Store";
+import RoutePaths from "@/services/Router/RoutePaths";
 
 class Page404 extends ErrorPage {
   constructor() {
@@ -26,23 +26,19 @@ export class App extends Component {
   private static _router: Router;
 
   constructor() {
-    const initialPath = window.location.pathname;
-    const navbar = new Navbar({
-      currentPage: initialPath,
-    });
+    const navbar = new Navbar({});
     super("template", { navbar });
     this._navbar = navbar;
-    Store.set("currentPage", initialPath);
   }
 
   private setupRouting() {
     App._router
-      .use("/", Messenger)
-      .use("/sign-in", SignIn)
-      .use("/sign-up", SignUp)
-      .use("/user-settings", UserSettings)
-      .use("/page-500", Page500)
-      .use("*", Page404)
+      .use(RoutePaths.Messenger, Messenger)
+      .use(RoutePaths.SignIn, SignIn)
+      .use(RoutePaths.SignUp, SignUp)
+      .use(RoutePaths.UserSettings, UserSettings)
+      .use(RoutePaths.Page500, Page500)
+      .use(RoutePaths.NotFound, Page404)
       .start();
   }
 

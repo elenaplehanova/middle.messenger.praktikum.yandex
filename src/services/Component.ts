@@ -62,19 +62,28 @@ export abstract class Component<
     this.componentDidMount(this._meta.props);
   }
 
-  protected componentDidMount(oldProps?: Props<T>): void {}
+  protected componentDidMount(oldProps?: Props<T>): void {
+    this.renderComponent();
+    this.findElements();
+    this.bindElements();
+  }
 
   public dispatchComponentDidMount(): void {
     this.eventBus().emit(Component.EVENTS.FLOW_CDM);
   }
 
   private _componentDidUpdate(oldProps: Props<T>, newProps: Props<T>): void {
-    const response = this.componentDidUpdate(oldProps, newProps);
-    if (!response) {
-      return;
+    const shouldUpdate = this.componentDidUpdate(oldProps, newProps);
+    if (shouldUpdate) {
+      this.unbindElements();
+      this._render();
+      this.findElements();
+      this.bindElements();
     }
-    this._render();
   }
+  protected unbindElements() {}
+  protected findElements() {}
+  protected bindElements() {}
 
   protected componentDidUpdate(
     oldProps: Props<T>,
@@ -83,18 +92,15 @@ export abstract class Component<
     return !isEqual(oldProps, newProps);
   }
 
-  // setProps(nextProps: Props) {
-  //   if (!nextProps) {
-  //     return;
-  //   }
-  //   this.props = { ...this.props, ...nextProps };
-  //   this._render();
-  // }
-
   setProps(nextProps: Props) {
     if (!nextProps) return;
 
     const oldProps = { ...this.props };
+    const newProps = { ...this.props, ...nextProps };
+
+    if (isEqual(oldProps, newProps)) {
+      return;
+    }
 
     Object.assign(this.props, nextProps);
 
@@ -120,11 +126,7 @@ export abstract class Component<
       this._element.replaceWith(newElement);
       this._element = newElement;
 
-      // 👇 ВАЖНО: вызов renderComponent, если он реализован в дочернем классе
-      const self = this as any;
-      if (typeof self.renderComponent === "function") {
-        self.renderComponent();
-      }
+      this.renderComponent();
     }
   }
 
@@ -132,9 +134,11 @@ export abstract class Component<
     return "";
   }
 
-  public getContent(): HTMLElement | null {
+  protected renderComponent() {}
+
+  public getContent = (): HTMLElement | null => {
     return this.element;
-  }
+  };
 
   private _makePropsProxy(props: Props<T>): Props<T> {
     return new Proxy(props, {
@@ -151,8 +155,9 @@ export abstract class Component<
         prop: K,
         value: Props[K]
       ): boolean => {
+        const oldProps = { ...target };
         target[prop] = value;
-        this.eventBus().emit(Component.EVENTS.FLOW_CDU, { ...target }, target);
+        this.eventBus().emit(Component.EVENTS.FLOW_CDU, oldProps, target);
         return true;
       },
       deleteProperty: () => {

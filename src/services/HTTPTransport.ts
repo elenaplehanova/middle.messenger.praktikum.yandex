@@ -75,7 +75,6 @@ export class HTTPTransport {
     url: string,
     options: RequestOptions<QueryParams> = {}
   ): Promise<XMLHttpRequest> {
-    // Объединяем дефолтные настройки с переданными
     const mergedOptions: RequestOptions = {
       ...this.defaultOptions,
       ...options,
@@ -109,9 +108,19 @@ export class HTTPTransport {
       }
       xhr.withCredentials = withCredentials ?? true;
 
-      Object.keys(headers).forEach((key) => {
-        xhr.setRequestHeader(key, headers[key]);
-      });
+      const isFormData = data instanceof FormData;
+
+      if (!isFormData) {
+        Object.keys(headers).forEach((key) => {
+          xhr.setRequestHeader(key, headers[key]);
+        });
+      } else {
+        Object.keys(headers).forEach((key) => {
+          if (key.toLowerCase() !== "content-type") {
+            xhr.setRequestHeader(key, headers[key]);
+          }
+        });
+      }
 
       xhr.onload = () => {
         if (xhr.status === 401) {
@@ -130,7 +139,11 @@ export class HTTPTransport {
       if (isGet || !data) {
         xhr.send();
       } else {
-        xhr.send(JSON.stringify(data));
+        if (isFormData) {
+          xhr.send(data as FormData);
+        } else {
+          xhr.send(JSON.stringify(data));
+        }
       }
     });
   }
