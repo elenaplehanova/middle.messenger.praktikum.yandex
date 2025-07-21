@@ -1,6 +1,6 @@
 import api from "@/api/api";
 import { BaseAPI } from "@/api/BaseApi";
-import { QueryParams } from "@/services/HTTPTransport";
+import type { QueryParams } from "@/services/HTTPTransport";
 
 export class AuthApi extends BaseAPI {
   create(data: QueryParams): Promise<unknown> {

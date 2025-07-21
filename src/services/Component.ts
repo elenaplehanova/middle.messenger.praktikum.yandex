@@ -59,10 +59,10 @@ export abstract class Component<
   }
 
   private _componentDidMount(): void {
-    this.componentDidMount(this._meta.props);
+    this.componentDidMount();
   }
 
-  protected componentDidMount(oldProps?: Props<T>): void {
+  protected componentDidMount(): void {
     this.renderComponent();
     this.findElements();
     this.bindElements();
@@ -210,23 +210,4 @@ export abstract class Component<
 
     return result;
   };
-
-  addDOMEvents(
-    componentOrElement: Component<any> | HTMLElement | null,
-    events: { type: string; handler: EventListener }[]
-  ) {
-    let el: HTMLElement | null = null;
-
-    if (componentOrElement instanceof Component) {
-      el = componentOrElement.getContent();
-    } else {
-      el = componentOrElement;
-    }
-
-    if (el) {
-      events.forEach(({ type, handler }) => {
-        el!.addEventListener(type, handler);
-      });
-    }
-  }
 }

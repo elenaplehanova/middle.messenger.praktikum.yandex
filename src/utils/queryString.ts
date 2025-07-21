@@ -1,15 +1,16 @@
-import { isArrayOrObject, isPlainObject, PlainObject } from "./isEqual";
+import type { Indexed } from "@/utils/set";
+import { isArrayOrObject, isIndexed } from "./isEqual";
 
 function getKey(key: string, parentKey?: string) {
   return parentKey ? `${parentKey}[${key}]` : key;
 }
 
-export function queryString(data: PlainObject): string {
-  if (!isPlainObject(data)) {
+export function queryString(data: Indexed): string {
+  if (!isIndexed(data)) {
     throw new Error("input must be an object");
   }
 
-  function getParams(data: PlainObject | [], parentKey?: string) {
+  function getParams(data: Indexed | [], parentKey?: string) {
     const result: [string, string][] = [];
 
     for (const [key, value] of Object.entries(data)) {
@@ -27,6 +28,6 @@ export function queryString(data: PlainObject): string {
   }
 
   return getParams(data)
-    .map((arr: any[]) => arr.join("="))
+    .map((arr: [string, string]) => arr.join("="))
     .join("&");
 }

@@ -11,11 +11,11 @@ import {
   validatePhone,
 } from "@/utils/validation";
 import { connect } from "@/services/Store/Connect";
-import { Indexed } from "@/utils/set";
+import type { Indexed } from "@/utils/set";
 import Store from "@/services/Store/Store";
 import { App } from "@/components/App";
 import { userApi } from "@/api/UserApi";
-import { QueryParams } from "@/services/HTTPTransport";
+import type { QueryParams } from "@/services/HTTPTransport";
 import RoutePaths from "@/services/Router/RoutePaths";
 import { authApi } from "@/api/AuthApi";
 
@@ -122,7 +122,7 @@ class UserSettings extends Component<UserSettingsProps> {
 
         await userApi.update(userData);
       } catch (error) {
-        console.dir("Error in update user data");
+        console.dir("Error in update user data", error);
       }
     }
   };
@@ -134,7 +134,7 @@ class UserSettings extends Component<UserSettingsProps> {
         formData.append("avatar", this._avatar.files[0]);
         await userApi.changeAvatar(formData);
       } catch (error) {
-        console.dir("Error in update avatar");
+        console.dir("Error in update avatar", error);
       }
     }
   };
@@ -161,17 +161,21 @@ class UserSettings extends Component<UserSettingsProps> {
         try {
           await userApi.changePassword(passwordData);
         } catch (error) {
-          console.dir("Error in update password");
+          console.dir("Error in update password", error);
         }
       }
     }
   };
 
-  handleSubmit = async (e: SubmitEvent) => {
+  handleSubmit = async (e: Event) => {
     e.preventDefault();
-    this.submitGeneralSettings();
-    this.submitPhoto();
-    this.submitPassword();
+    try {
+      await this.submitGeneralSettings();
+      await this.submitPhoto();
+      await this.submitPassword();
+    } catch (error) {
+      console.dir(error);
+    }
   };
 
   handleFirstNameBlur = () => {
@@ -209,10 +213,8 @@ class UserSettings extends Component<UserSettingsProps> {
   handleClickLogout = async (e: Event) => {
     e.preventDefault();
     try {
-      await authApi.logout().then(() => {
-        Store.set("user", null);
-      });
-
+      await authApi.logout();
+      Store.set("user", null);
       App.getRouter().go(RoutePaths.SignIn);
     } catch (error) {
       console.dir(error);
@@ -273,8 +275,13 @@ class UserSettings extends Component<UserSettingsProps> {
   };
 
   bindElements = () => {
-    this._logOut?.addEventListener("click", (e) => this.handleClickLogout(e));
-    this._form?.addEventListener("submit", this.handleSubmit);
+    this._logOut?.addEventListener(
+      "click",
+      (e) => void this.handleClickLogout(e)
+    );
+    this._form?.addEventListener("submit", (e) => {
+      void this.handleSubmit(e);
+    });
     this._firstNameInput?.addEventListener("blur", this.handleFirstNameBlur);
     this._secondNameInput?.addEventListener("blur", this.handleSecondNameBlur);
     this._displayNameInput?.addEventListener(
@@ -298,8 +305,13 @@ class UserSettings extends Component<UserSettingsProps> {
   };
 
   unbindElements = () => {
-    this._logOut?.removeEventListener("click", this.handleClickLogout);
-    this._form?.removeEventListener("submit", this.handleSubmit);
+    this._logOut?.removeEventListener(
+      "click",
+      (e) => void this.handleClickLogout(e)
+    );
+    this._form?.removeEventListener("submit", (e) => {
+      void this.handleSubmit(e);
+    });
     this._firstNameInput?.removeEventListener("blur", this.handleFirstNameBlur);
     this._secondNameInput?.removeEventListener(
       "blur",
@@ -334,7 +346,7 @@ class UserSettings extends Component<UserSettingsProps> {
 
   componentDidMount() {
     if (!this.props.user) {
-      this.getUserData();
+      void this.getUserData();
     } else {
       this.renderComponent();
       this.findElements();

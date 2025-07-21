@@ -4,15 +4,11 @@ import template from "./SignIn.hbs?raw";
 import { Component } from "@/services/Component";
 import { compile } from "handlebars";
 import { validateLogin, validatePassword } from "@/utils/validation";
-import { QueryParams } from "@/services/HTTPTransport";
+import type { QueryParams } from "@/services/HTTPTransport";
 import { connect } from "@/services/Store/Connect";
 import { App } from "@/components/App";
 import RoutePaths from "@/services/Router/RoutePaths";
 import { authApi } from "@/api/AuthApi";
-
-type Indexed<T = unknown> = {
-  [key in string]: T;
-};
 
 interface SignInProps extends Record<string, unknown> {
   button?: Button;
@@ -52,7 +48,7 @@ class SignIn extends Component<SignInProps> {
     this._button.dispatchComponentDidMount();
   };
 
-  handleSubmit = async (e: SubmitEvent) => {
+  handleSubmit = async (e: Event) => {
     e.preventDefault();
     const isLoginValid = this.validateField(this._loginInput, validateLogin);
     const isPasswordValid = this.validateField(
@@ -69,7 +65,7 @@ class SignIn extends Component<SignInProps> {
       };
 
       try {
-        const response = await authApi.signIn(loginData);
+        await authApi.signIn(loginData);
         App.getRouter().go(RoutePaths.Messenger);
       } catch (error) {
         console.error("Registration failed:", error);
@@ -87,7 +83,7 @@ class SignIn extends Component<SignInProps> {
     this.validateField(this._passwordInput, validatePassword);
   };
 
-  handleClickSignUp = async (e: Event) => {
+  handleClickSignUp = (e: Event) => {
     e.preventDefault();
     App.getRouter().go(RoutePaths.SignUp);
   };
@@ -103,14 +99,20 @@ class SignIn extends Component<SignInProps> {
   }
 
   bindElements(): void {
-    this._form?.addEventListener("submit", this.handleSubmit);
+    this._form?.addEventListener(
+      "submit",
+      (e: Event) => void this.handleSubmit(e)
+    );
     this._loginInput?.addEventListener("blur", this.handleLoginBlur);
     this._passwordInput?.addEventListener("blur", this.handlePasswordBlur);
     this._signUp?.addEventListener("click", this.handleClickSignUp);
   }
 
   unbindElements(): void {
-    this._form?.removeEventListener("submit", this.handleSubmit);
+    this._form?.removeEventListener(
+      "submit",
+      (e: Event) => void this.handleSubmit(e)
+    );
     this._loginInput?.removeEventListener("blur", this.handleLoginBlur);
     this._passwordInput?.removeEventListener("blur", this.handlePasswordBlur);
     this._signUp?.removeEventListener("click", this.handleClickSignUp);
@@ -123,7 +125,7 @@ class SignIn extends Component<SignInProps> {
   }
 }
 
-const mapSignInState = (state: Indexed) => ({
+const mapSignInState = (state: { user?: { isAuth?: boolean } }) => ({
   isAuth: state?.user?.isAuth,
 });
 

@@ -1,4 +1,4 @@
-import { Component } from "../Component";
+import type { Component } from "../Component";
 
 const render = (query: string, block: Component) => {
   const root = document.querySelector(query);
@@ -23,13 +23,13 @@ type RouteProps = {
 
 export class Route {
   protected _pathname: string;
-  protected _blockClass: new (...args: any[]) => Component;
+  protected _blockClass: new (props?: Record<string, unknown>) => Component;
   protected _block: Component | null;
   protected _props: RouteProps;
 
   constructor(
     pathname: string,
-    view: new (...args: any[]) => Component,
+    view: new (props?: Record<string, unknown>) => Component,
     props: RouteProps
   ) {
     this._pathname = pathname;
@@ -65,7 +65,7 @@ export class Route {
 
   render = () => {
     // this.leave();
-    this._block = new this._blockClass();
+    this._block = new this._blockClass({});
     render(this._props.rootQuery, this._block);
   };
 }

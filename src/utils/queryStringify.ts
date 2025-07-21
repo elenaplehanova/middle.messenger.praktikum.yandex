@@ -1,17 +1,7 @@
-type StringIndexed = Record<string, any>;
+import type { Indexed } from "@/utils/set";
 
-const obj: StringIndexed = {
-  key: 1,
-  key2: "test",
-  key3: false,
-  key4: true,
-  key5: [1, 2, 3],
-  key6: { a: 1 },
-  key7: { b: { d: 2 } }
-};
-
-function queryStringify(data: StringIndexed): string | never {
-  if (typeof data !== "object") {
+function queryStringify(data: Indexed): string | never {
+  if (typeof data !== "object" || !data) {
     throw new Error("Data must be object");
   }
 
@@ -21,10 +11,10 @@ function queryStringify(data: StringIndexed): string | never {
     const endLine = index < keys.length - 1 ? "&" : "";
 
     if (Array.isArray(value)) {
-      const arrayValue = value.reduce<StringIndexed>(
-        (result, arrData, index) => ({
+      const arrayValue = value.reduce<Indexed>(
+        (result, arrData: unknown, index) => ({
           ...result,
-          [`${key}[${index}]`]: arrData
+          [`${key}[${index}]`]: arrData,
         }),
         {}
       );
@@ -32,20 +22,18 @@ function queryStringify(data: StringIndexed): string | never {
       return `${result}${queryStringify(arrayValue)}${endLine}`;
     }
 
-    if (typeof value === "object") {
-      const objValue = Object.keys(value || {}).reduce<StringIndexed>(
-        (result, objKey) => ({
-          ...result,
-          [`${key}[${objKey}]`]: value[objKey]
-        }),
-        {}
-      );
+    if (typeof value === "object" && value !== null) {
+      const objValue: Indexed = Object.keys(value).reduce((acc, objKey) => {
+        const nestedValue = (value as Indexed)[objKey];
+        acc[`${key}[${objKey}]`] = nestedValue;
+        return acc;
+      }, {} as Indexed);
 
       return `${result}${queryStringify(objValue)}${endLine}`;
     }
 
-    return `${result}${key}=${value}${endLine}`;
+    return `${result}${encodeURIComponent(key)}=${encodeURIComponent(String(value))}${endLine}`;
   }, "");
 }
 
-export default queryStringify
+export default queryStringify;

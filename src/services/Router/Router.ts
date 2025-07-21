@@ -1,4 +1,4 @@
-import { Component } from "../Component";
+import type { Component } from "../Component";
 import { Route } from "./Route";
 
 export class Router {
@@ -21,7 +21,10 @@ export class Router {
     Router.__instance = this;
   }
 
-  public use = (pathname: string, block: new () => Component) => {
+  public use = (
+    pathname: string,
+    block: new (props?: Record<string, unknown>) => Component
+  ) => {
     const route = new Route(pathname, block, { rootQuery: this._rootQuery });
     this.routes.push(route);
     return this;

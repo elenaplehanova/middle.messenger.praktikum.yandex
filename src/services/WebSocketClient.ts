@@ -1,8 +1,17 @@
+export interface IncomingMessage {
+  content: string;
+  time: string;
+  user_id: number;
+  type?: string;
+}
+
 export class WebSocketClient {
   private socket: WebSocket;
   private url: string;
-  private onMessageCallback: ((data: any) => void) | null = null;
-  private onOpenCallback: ((data: any) => void) | null = null;
+  private onMessageCallback:
+    | ((data: IncomingMessage | IncomingMessage[]) => void)
+    | null = null;
+  private onOpenCallback: ((data: unknown) => void) | null = null;
 
   constructor(url: string) {
     this.url = url;
@@ -21,7 +30,14 @@ export class WebSocketClient {
 
   private handleMessage = (event: MessageEvent) => {
     if (this.onMessageCallback) {
-      this.onMessageCallback(event.data);
+      if (typeof event.data === "string") {
+        const parsed = JSON.parse(event.data) as
+          | IncomingMessage
+          | IncomingMessage[];
+        this.onMessageCallback(parsed);
+      } else {
+        console.warn("Unexpected data type from WebSocket:", typeof event.data);
+      }
     }
   };
 
@@ -64,11 +80,13 @@ export class WebSocketClient {
     this.socket.close();
   }
 
-  public onMessage(callback: (data: any) => void): void {
+  public onMessage(
+    callback: (data: IncomingMessage | IncomingMessage[]) => void
+  ): void {
     this.onMessageCallback = callback;
   }
 
-  public onOpen(callback: (data: any) => void): void {
+  public onOpen(callback: (data: unknown) => void): void {
     this.onOpenCallback = callback;
   }
 }

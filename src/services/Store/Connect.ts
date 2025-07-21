@@ -1,5 +1,5 @@
 import isEqual from "@/utils/isEqual";
-import { Component } from "../Component";
+import type { Component } from "../Component";
 import Store, { StoreEvents } from "./Store";
 
 type Indexed<T = unknown> = {
@@ -11,7 +11,7 @@ export function connect(mapStateToProps: (state: Indexed) => Indexed) {
     ConnectedComponent: new (props: P) => Component<P>
   ) {
     return class extends ConnectedComponent {
-      constructor(props: P) {
+      constructor(props: P = {} as P) {
         let oldState = mapStateToProps(Store.getState());
         super({ ...props, ...oldState });
 

@@ -10,7 +10,7 @@ import {
   validatePassword,
   validatePhone,
 } from "@/utils/validation";
-import { QueryParams } from "@/services/HTTPTransport";
+import type { QueryParams } from "@/services/HTTPTransport";
 import { App } from "@/components/App";
 import RoutePaths from "@/services/Router/RoutePaths";
 import { authApi } from "@/api/AuthApi";
@@ -58,7 +58,7 @@ export class SignUp extends Component {
     this._button.dispatchComponentDidMount();
   };
 
-  handleSubmit = async (e: SubmitEvent) => {
+  handleSubmit = async (e: Event) => {
     e.preventDefault();
     const isFirstNameValid = this.validateField(
       this._firstNameInput,
@@ -95,7 +95,7 @@ export class SignUp extends Component {
       };
 
       try {
-        const response = await authApi.create(registrationData);
+        await authApi.create(registrationData);
         App.getRouter().go(RoutePaths.SignIn);
       } catch (error) {
         console.dir("Registration failed:", error);
@@ -129,7 +129,7 @@ export class SignUp extends Component {
     this.validateField(this._phoneInput, validatePhone);
   };
 
-  handleClickSignIn = async (e: Event) => {
+  handleClickSignIn = (e: Event) => {
     e.preventDefault();
     App.getRouter().go(RoutePaths.SignIn);
   };
@@ -151,7 +151,10 @@ export class SignUp extends Component {
   }
 
   bindElements(): void {
-    this._form?.addEventListener("submit", this.handleSubmit);
+    this._form?.addEventListener(
+      "submit",
+      (e: Event) => void this.handleSubmit(e)
+    );
     this._firstNameInput?.addEventListener("blur", this.handleFirstNameBlur);
     this._secondNameInput?.addEventListener("blur", this.handleSecondNameBlur);
     this._loginInput?.addEventListener("blur", this.handleLoginBlur);
@@ -162,7 +165,10 @@ export class SignUp extends Component {
   }
 
   unbindElements(): void {
-    this._form?.removeEventListener("submit", this.handleSubmit);
+    this._form?.removeEventListener(
+      "submit",
+      (e: Event) => void this.handleSubmit(e)
+    );
     this._firstNameInput?.removeEventListener("blur", this.handleFirstNameBlur);
     this._secondNameInput?.removeEventListener(
       "blur",

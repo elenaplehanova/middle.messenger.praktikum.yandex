@@ -1,20 +1,22 @@
 import "./ChatRoom.scss";
 import template from "./ChatRoom.hbs?raw";
 import { compile } from "handlebars";
-import { Component, Props } from "@/services/Component";
+import type { Props } from "@/services/Component";
+import { Component } from "@/services/Component";
 import { Button } from "@components/Button";
 import { validateMessage } from "@/utils/validation";
 import type { MessageProps } from "../MessageBlock";
 import { MessageBlock } from "../MessageBlock";
 import { formatTime } from "@/utils/formatData";
-import { Indexed } from "@/utils/set";
+import type { Indexed } from "@/utils/set";
 import { connect } from "@/services/Store/Connect";
-import { ChatData } from "../Chat/Chat";
+import type { ChatData } from "../Chat/Chat";
 import { chatsApi } from "@/api/ChatsApi";
 import isEqual from "@/utils/isEqual";
 import { WebSocketClient } from "@/services/WebSocketClient";
 import Store from "@/services/Store/Store";
-import { UserData } from "@/pages/UserSettings/UserSettings";
+import type { UserData } from "@/pages/UserSettings/UserSettings";
+import type { IncomingMessage } from "@/services/WebSocketClient";
 import { authApi } from "@/api/AuthApi";
 
 interface ChatRoomProps {
@@ -22,6 +24,10 @@ interface ChatRoomProps {
   currentChat?: ChatData;
   currentChatId?: number;
   [key: string]: unknown;
+}
+
+export interface ChatToken {
+  token: string;
 }
 
 class ChatRoom extends Component<ChatRoomProps> {
@@ -147,24 +153,23 @@ class ChatRoom extends Component<ChatRoomProps> {
         });
 
         this._client.onMessage((data) => {
-          const parsed = JSON.parse(data);
-          if (Array.isArray(parsed)) {
+          if (Array.isArray(data)) {
             this._messagesByChat[currentId] = [];
-            parsed
+            data
               .sort(
                 (a, b) =>
                   new Date(a.time).getTime() - new Date(b.time).getTime()
               )
-              .forEach((msg) => this.addMessageFromSocket(msg));
-          } else if (parsed.type === "message") {
-            this.addMessageFromSocket(parsed);
+              .forEach((message) => this.addMessageFromSocket(message));
+          } else if (data.type === "message") {
+            this.addMessageFromSocket(data);
           }
         });
       }
     }
   };
 
-  addMessageFromSocket(message: any) {
+  addMessageFromSocket(message: IncomingMessage) {
     const currentId = this.props.currentChatId!;
     const newMessage: MessageProps = {
       text: message.content,
@@ -194,7 +199,7 @@ class ChatRoom extends Component<ChatRoomProps> {
   ): boolean {
     const res = !isEqual(oldProps, newProps);
     if (res) {
-      (async () => await this.startChat())();
+      void this.startChat();
     }
     return res;
   }

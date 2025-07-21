@@ -4,7 +4,7 @@ import { compile } from "handlebars";
 import { Component } from "@/services/Component";
 import { chatsApi } from "@/api/ChatsApi";
 import { Button } from "../Button";
-import { Indexed } from "@/utils/set";
+import type { Indexed } from "@/utils/set";
 import { connect } from "@/services/Store/Connect";
 import Store from "@/services/Store/Store";
 import { App } from "../App";
@@ -23,7 +23,6 @@ export interface ChatData {
 interface ChatProps {
   chats?: ChatData[];
   currentChatId?: number | null;
-  // onSelectChat?: (chat: ChatData) => void;
   [key: string]: unknown;
 }
 
@@ -59,11 +58,11 @@ class Chat extends Component<ChatProps> {
   handlerClickDeleteChat = async (e: Event, id: number) => {
     e.preventDefault();
     e.stopPropagation();
-    const res = await chatsApi.delete({ chatId: id });
-    this.getChatsData();
+    await chatsApi.delete({ chatId: id });
+    await this.getChatsData();
   };
 
-  handlerClickAddChat = async (e: Event) => {
+  handlerClickAddChat = (e: Event) => {
     e.preventDefault();
     this._addUserModalEvents?.classList.add("modal_active");
   };
@@ -114,8 +113,9 @@ class Chat extends Component<ChatProps> {
       const chatId = Number(item.getAttribute("data-id"));
       item.addEventListener("click", this.handleClickChat(chatId));
       this._deleteButton = item.querySelector("#delete-button");
-      this._deleteButton?.addEventListener("click", (e: Event) =>
-        this.handlerClickDeleteChat(e, chatId)
+      this._deleteButton?.addEventListener(
+        "click",
+        (e: Event) => void this.handlerClickDeleteChat(e, chatId)
       );
     });
     this._buttonEvents?.addEventListener("click", this.handlerClickAddChat);
@@ -129,8 +129,9 @@ class Chat extends Component<ChatProps> {
         const chatId = Number(item.getAttribute("data-id"));
         item.removeEventListener("click", this.handleClickChat(chatId));
         this._deleteButton = item.querySelector("#delete-button");
-        this._deleteButton?.removeEventListener("click", (e: Event) =>
-          this.handlerClickDeleteChat(e, chatId)
+        this._deleteButton?.removeEventListener(
+          "click",
+          (e: Event) => void this.handlerClickDeleteChat(e, chatId)
         );
       });
     }
@@ -148,7 +149,7 @@ class Chat extends Component<ChatProps> {
 
   componentDidMount() {
     if (!this.props.chats) {
-      this.getChatsData();
+      void this.getChatsData();
     } else {
       this.renderComponent();
       this.findElements();

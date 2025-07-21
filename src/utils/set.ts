@@ -1,14 +1,10 @@
 import merge from "./merge";
 
 export type Indexed<T = unknown> = {
-  [key in string]: T;
+  [key in string | symbol]: T;
 };
 
-function set(
-  object: Indexed | unknown,
-  path: string,
-  value: unknown
-): Indexed | unknown {
+function set(object: Indexed, path: string, value: unknown): Indexed {
   if (typeof object !== "object" || object === null) {
     return object;
   }
@@ -21,9 +17,9 @@ function set(
     (acc, key) => ({
       [key]: acc,
     }),
-    value as any
+    value as Indexed
   );
-  return merge(object as Indexed, result);
+  return merge(object, result);
 }
 
 export default set;

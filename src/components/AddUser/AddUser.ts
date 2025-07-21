@@ -7,7 +7,7 @@ import "./AddUser.scss";
 import { chatsApi } from "@/api/ChatsApi";
 import { userApi } from "@/api/UserApi";
 import Store from "@/services/Store/Store";
-import { ChatData } from "../Chat/Chat";
+import type { ChatData } from "../Chat/Chat";
 
 interface AddUserProps extends Record<string, unknown> {
   button?: Button;
@@ -43,7 +43,7 @@ export class AddUser extends Component {
     this._button.dispatchComponentDidMount();
   };
 
-  handleSubmit = async (e: SubmitEvent) => {
+  handleSubmit = async (e: Event) => {
     e.preventDefault();
     const isLoginValid = this.validateField(this._userLogin, validateLogin);
     const login = this._userLogin?.value;
@@ -51,12 +51,12 @@ export class AddUser extends Component {
       try {
         const foundedUsers = await userApi.searchUser({ login: login });
         if (Array.isArray(foundedUsers)) {
-          const currentUserId = foundedUsers?.[0]?.id;
+          const currentUserId: number = foundedUsers?.[0]?.id;
           const newChat: ChatData = await chatsApi.create({
             title: login,
           });
 
-          const newUser = await chatsApi.addUsersToChat({
+          await chatsApi.addUsersToChat({
             users: [currentUserId],
             chatId: newChat.id,
           });
@@ -98,13 +98,19 @@ export class AddUser extends Component {
   }
 
   bindElements(): void {
-    this._form?.addEventListener("submit", this.handleSubmit);
+    this._form?.addEventListener(
+      "submit",
+      (e: Event) => void this.handleSubmit(e)
+    );
     this._userLogin?.addEventListener("blur", this.handleLoginBlur);
     this._closeButton?.addEventListener("click", this.handleClickClose);
   }
 
   unbindElements(): void {
-    this._form?.removeEventListener("submit", this.handleSubmit);
+    this._form?.removeEventListener(
+      "submit",
+      (e: Event) => void this.handleSubmit(e)
+    );
     this._userLogin?.removeEventListener("blur", this.handleLoginBlur);
     this._closeButton?.removeEventListener("click", this.handleClickClose);
   }

@@ -1,3 +1,5 @@
+import queryStringify from "@/utils/queryStringify";
+
 enum METHODS {
   GET = "GET",
   POST = "POST",
@@ -7,10 +9,13 @@ enum METHODS {
 
 type HTTPMethod = <R = unknown>(
   url: string,
-  options?: Partial<RequestOptions<QueryParams>>
+  options?: Partial<RequestOptions<QueryParams | FormData>>
 ) => Promise<R>;
 
-export type QueryParams = Record<string, string | number | boolean>;
+export type QueryParams = Record<
+  string,
+  string | number | boolean | (string | number)[]
+>;
 
 type RequestOptions<T = unknown> = {
   headers?: Record<string, string>;
@@ -40,22 +45,6 @@ export class HTTPTransport {
     this.onUnauthorized = handler;
   }
 
-  private queryStringify(
-    data: Record<string, string | number | boolean>
-  ): string {
-    if (typeof data !== "object" || data === null) {
-      throw new Error("Data must be object");
-    }
-    const keys = Object.keys(data);
-    return keys.reduce((result, key, index) => {
-      const value = data[key];
-      const separator = index < keys.length - 1 ? "&" : "";
-      const encodedKey = encodeURIComponent(key);
-      const encodedValue = encodeURIComponent(JSON.stringify(value));
-      return `${result}${encodedKey}=${encodedValue}${separator}`;
-    }, "?");
-  }
-
   private async parseResponse<R>(xhr: XMLHttpRequest): Promise<R> {
     try {
       return (await JSON.parse(xhr.responseText)) as R;
@@ -73,7 +62,7 @@ export class HTTPTransport {
 
   private request(
     url: string,
-    options: RequestOptions<QueryParams> = {}
+    options: RequestOptions<QueryParams | FormData> = {}
   ): Promise<XMLHttpRequest> {
     const mergedOptions: RequestOptions = {
       ...this.defaultOptions,
@@ -100,15 +89,14 @@ export class HTTPTransport {
       const xhr = new XMLHttpRequest();
       const isGet = method === METHODS.GET;
 
-      if (isGet && data && typeof data === "object" && data !== null) {
-        const query = this.queryStringify(data);
+      const isFormData = data instanceof FormData;
+      if (isGet && data && typeof data === "object" && !data && !isFormData) {
+        const query = queryStringify(data);
         xhr.open(method, `${url}${query}`);
       } else {
         xhr.open(method, url);
       }
       xhr.withCredentials = withCredentials ?? true;
-
-      const isFormData = data instanceof FormData;
 
       if (!isFormData) {
         Object.keys(headers).forEach((key) => {
@@ -140,7 +128,7 @@ export class HTTPTransport {
         xhr.send();
       } else {
         if (isFormData) {
-          xhr.send(data as FormData);
+          xhr.send(data);
         } else {
           xhr.send(JSON.stringify(data));
         }

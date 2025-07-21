@@ -1,8 +1,6 @@
-export type PlainObject<T = any> = {
-  [k in string]: T;
-};
+import type { Indexed } from "@/utils/set";
 
-export function isPlainObject(value: unknown): value is PlainObject {
+export function isIndexed(value: unknown): value is Indexed {
   return (
     typeof value === "object" &&
     value !== null &&
@@ -15,30 +13,45 @@ function isArray(value: unknown): value is [] {
   return Array.isArray(value);
 }
 
-export function isArrayOrObject(value: unknown): value is [] | PlainObject {
-  return isPlainObject(value) || isArray(value);
+export function isArrayOrObject(value: unknown): value is [] | Indexed {
+  return isIndexed(value) || isArray(value);
 }
 
-function isEqual(lhs: PlainObject, rhs: PlainObject) {
-  if (Object.keys(lhs).length !== Object.keys(rhs).length) {
-    return false;
-  }
+export function isEqual(lhs: unknown, rhs: unknown): boolean {
+  if (isIndexed(lhs) && isIndexed(rhs)) {
+    const lhsKeys = Object.keys(lhs);
+    const rhsKeys = Object.keys(rhs);
 
-  for (const [key, value] of Object.entries(lhs)) {
-    const rightValue = rhs[key];
-    if (isArrayOrObject(value) && isArrayOrObject(rightValue)) {
-      if (isEqual(value, rightValue)) {
-        continue;
+    if (lhsKeys.length !== rhsKeys.length) {
+      return false;
+    }
+
+    for (const key of lhsKeys) {
+      if (!rhsKeys.includes(key)) {
+        return false;
       }
+
+      if (!isEqual(lhs[key], rhs[key])) {
+        return false;
+      }
+    }
+
+    return true;
+  } else if (isArray(lhs) && isArray(rhs)) {
+    if (lhs.length !== rhs.length) {
       return false;
     }
 
-    if (value !== rightValue) {
-      return false;
+    for (let i = 0; i < lhs.length; i++) {
+      if (!isEqual(lhs[i], rhs[i])) {
+        return false;
+      }
     }
+
+    return true;
+  } else {
+    return lhs === rhs;
   }
-
-  return true;
 }
 
 export default isEqual;

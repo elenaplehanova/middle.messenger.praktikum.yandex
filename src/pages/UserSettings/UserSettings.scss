@@ -67,9 +67,11 @@
       color: var(--violet-dark, black);
     }
   }
+
   &__password-toggle {
     margin-top: 20px;
   }
+
   &__toggle-label {
     cursor: pointer;
     color: var(--text-color);

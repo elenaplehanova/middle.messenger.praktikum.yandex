@@ -1,6 +1,7 @@
 import api from "@/api/api";
 import { BaseAPI } from "@/api/BaseApi";
-import { QueryParams } from "@/services/HTTPTransport";
+import type { ChatData } from "@/components/Chat/Chat";
+import type { QueryParams } from "@/services/HTTPTransport";
 
 class UserApi extends BaseAPI {
   update(data: QueryParams): Promise<unknown> {
@@ -17,7 +18,7 @@ class UserApi extends BaseAPI {
   changePassword(data: QueryParams): Promise<unknown> {
     return api.put(`${BaseAPI.BASE_URL}/user/password`, { data });
   }
-  searchUser(data: QueryParams): Promise<unknown> {
+  searchUser(data: QueryParams): Promise<ChatData[]> {
     return api.post(`${BaseAPI.BASE_URL}/user/search`, { data });
   }
 }
