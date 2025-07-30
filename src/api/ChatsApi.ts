@@ -23,6 +23,9 @@ export class ChatsApi extends BaseAPI {
   getChatsUsers(id: number): Promise<unknown> {
     return api.get(`${BaseAPI.BASE_URL}/chats/${id}/users`);
   }
+  deleteUsersFromChat(data: QueryParams): Promise<unknown> {
+    return api.delete(`${BaseAPI.BASE_URL}/chats/users`, { data });
+  }
 }
 
 export const chatsApi = new ChatsApi();

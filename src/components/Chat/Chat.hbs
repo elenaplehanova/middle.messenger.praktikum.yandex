@@ -3,7 +3,12 @@
     <div class="chat__container">
         {{#each chats}}
         <article class="chat__item {{#if (eq ../currentChatId id)}}chat__item_active{{/if}}" data-id="{{id}}">
-            <div class="photo chat__photo"></div>
+            {{#if last_message.user.avatar}}
+            <img class="photo chat__photo"
+                src="https://ya-praktikum.tech/api/v2/resources/{{last_message.user.avatar}}" />
+            {{else}}
+            <div class="photo chat__photo chat__photo_default"></div>
+            {{/if}}
             <p class="chat__user-name">{{title}}</p>
             <p class="chat__user-message">{{last_message.content}}</p>
             <button class="button chat__button" id="delete-button">✖</button>

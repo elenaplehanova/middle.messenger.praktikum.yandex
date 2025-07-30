@@ -18,6 +18,7 @@ import Store from "@/services/Store/Store";
 import type { UserData } from "@/pages/UserSettings/UserSettings";
 import type { IncomingMessage } from "@/services/WebSocketClient";
 import { authApi } from "@/api/AuthApi";
+import { CurrentUsers } from "../CurrentUsers";
 
 interface ChatRoomProps {
   user?: UserData;
@@ -32,10 +33,13 @@ export interface ChatToken {
 
 class ChatRoom extends Component<ChatRoomProps> {
   private _button: Button;
+  private _buttonUsers: Button;
+  private _buttonUsersEvents: HTMLElement | null = null;
   private _form: HTMLElement | null = null;
   private _messageInput: HTMLInputElement | null = null;
   private _client: WebSocketClient | null = null;
   private _messagesByChat: Record<number, MessageProps[]> = {};
+  private _currentUsersModal;
 
   constructor(props: ChatRoomProps = {}) {
     const button = new Button({
@@ -43,9 +47,29 @@ class ChatRoom extends Component<ChatRoomProps> {
       className: "chat-room__button",
       type: "submit",
     });
-    super("template", { ...props, button });
+    const buttonUsers = new Button({
+      text: "Current users",
+      className: "chat-room__button-current-users",
+      type: "button",
+    });
+    const currentUsersModal = new CurrentUsers({});
+    super("template", { ...props, button, currentUsersModal });
     this._button = button;
+    this._buttonUsers = buttonUsers;
+    this._currentUsersModal = currentUsersModal;
   }
+
+  handlerClickCurrentUsers = (e: Event) => {
+    e.preventDefault();
+    e.stopPropagation();
+    this._currentUsersModal.show();
+  };
+
+  handleClickOutModal = (e: Event) => {
+    if (e.target === this._currentUsersModal.getContent()) {
+      this._currentUsersModal.hide();
+    }
+  };
 
   render() {
     return compile(template)(this.props);
@@ -59,6 +83,26 @@ class ChatRoom extends Component<ChatRoomProps> {
       buttonPlaceholder.replaceWith(this._button.getContent()!);
     }
     this._button.dispatchComponentDidMount();
+
+    const buttonCurrentUsersPlaceholder = this.element?.querySelector(
+      '[data-component="button-current-users"]'
+    );
+    if (buttonCurrentUsersPlaceholder && this._buttonUsers.getContent()) {
+      buttonCurrentUsersPlaceholder.replaceWith(
+        this._buttonUsers.getContent()!
+      );
+    }
+    this._buttonUsers.dispatchComponentDidMount();
+
+    const currentUsersPlaceholder = this.element?.querySelector(
+      '[data-component="current-users"]'
+    );
+    if (currentUsersPlaceholder && this._currentUsersModal.getContent()) {
+      currentUsersPlaceholder.replaceWith(
+        this._currentUsersModal.getContent()!
+      );
+    }
+    this._currentUsersModal.dispatchComponentDidMount();
   };
 
   handleSubmit = (e: SubmitEvent) => {
@@ -115,16 +159,27 @@ class ChatRoom extends Component<ChatRoomProps> {
     this._form = this.element.querySelector(".chat-room__message-panel");
     this._messageInput =
       this.element.querySelector<HTMLInputElement>("#message");
+    this._buttonUsersEvents = this.element.querySelector("#button");
   };
 
   bindElements = (): void => {
     this._form?.addEventListener("submit", this.handleSubmit);
     this._messageInput?.addEventListener("blur", this.handleMessageBlur);
+    this._buttonUsersEvents?.addEventListener(
+      "click",
+      this.handlerClickCurrentUsers
+    );
+    window.addEventListener("click", this.handleClickOutModal);
   };
 
   unbindElements = (): void => {
     this._form?.removeEventListener("submit", this.handleSubmit);
     this._messageInput?.removeEventListener("blur", this.handleMessageBlur);
+    this._buttonUsersEvents?.removeEventListener(
+      "click",
+      this.handlerClickCurrentUsers
+    );
+    window.removeEventListener("click", this.handleClickOutModal);
   };
 
   startChat = async () => {
@@ -197,11 +252,15 @@ class ChatRoom extends Component<ChatRoomProps> {
     oldProps: Props<ChatRoomProps>,
     newProps: Props<ChatRoomProps>
   ): boolean {
-    const res = !isEqual(oldProps, newProps);
-    if (res) {
+    const shouldUpdate =
+      oldProps.currentChatId !== newProps.currentChatId ||
+      !isEqual(oldProps.user, newProps.user);
+
+    if (shouldUpdate) {
       void this.startChat();
     }
-    return res;
+
+    return !isEqual(oldProps, newProps);
   }
 }
 

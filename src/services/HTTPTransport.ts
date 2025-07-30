@@ -36,10 +36,10 @@ export class HTTPTransport {
 
   private onUnauthorized?: () => void;
 
-  get: HTTPMethod = this.createMethod(METHODS.GET);
-  post: HTTPMethod = this.createMethod(METHODS.POST);
-  put: HTTPMethod = this.createMethod(METHODS.PUT);
-  delete: HTTPMethod = this.createMethod(METHODS.DELETE);
+  get = this.createMethod(METHODS.GET);
+  post = this.createMethod(METHODS.POST);
+  put = this.createMethod(METHODS.PUT);
+  delete = this.createMethod(METHODS.DELETE);
 
   setUnauthorizedHandler(handler: () => void) {
     this.onUnauthorized = handler;

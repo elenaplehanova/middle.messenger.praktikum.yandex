@@ -31,10 +31,14 @@ export class WebSocketClient {
   private handleMessage = (event: MessageEvent) => {
     if (this.onMessageCallback) {
       if (typeof event.data === "string") {
-        const parsed = JSON.parse(event.data) as
-          | IncomingMessage
-          | IncomingMessage[];
-        this.onMessageCallback(parsed);
+        try {
+          const parsed = JSON.parse(event.data) as
+            | IncomingMessage
+            | IncomingMessage[];
+          this.onMessageCallback(parsed);
+        } catch (error) {
+          console.error("Failed to parse WebSocket message:", error);
+        }
       } else {
         console.warn("Unexpected data type from WebSocket:", typeof event.data);
       }

@@ -1,5 +1,9 @@
 <div class="chat-room">
-    <div class="title chat-room__title">{{currentChat.title}}</div>
+    {{#if currentChatId}}
+    <div class=" chat-room__header">
+        <div class="title chat-room__title">{{currentChat.title}}</div>
+        <div data-component="button-current-users"></div>
+    </div>
     <div class="chat-room__container"></div>
     <form class="chat-room__message-panel">
         <div class="input input-block__input-wrapper chat-room__input">
@@ -8,4 +12,6 @@
         </div>
         <div data-component="button"></div>
     </form>
+    <div data-component="current-users"></div>
+    {{/if}}
 </div>

@@ -11,6 +11,7 @@ export abstract class Component<
     FLOW_CDM: "flow:component-did-mount",
     FLOW_CDU: "flow:component-did-update",
     FLOW_RENDER: "flow:render",
+    FLOW_CWU: "flow:component-will-unmount",
   } as const;
 
   private _element: HTMLElement | null = null;
@@ -46,6 +47,25 @@ export abstract class Component<
     eventBus.on(Component.EVENTS.FLOW_CDM, this._componentDidMount.bind(this));
     eventBus.on(Component.EVENTS.FLOW_CDU, this._componentDidUpdate.bind(this));
     eventBus.on(Component.EVENTS.FLOW_RENDER, this._render.bind(this));
+    eventBus.on(
+      Component.EVENTS.FLOW_CWU,
+      this._componentWillUnmount.bind(this)
+    );
+  }
+
+  private _componentWillUnmount(): void {
+    this.componentWillUnmount();
+    this.unbindElements();
+  }
+
+  protected componentWillUnmount(): void {}
+
+  public destroy(): void {
+    this.eventBus().emit(Component.EVENTS.FLOW_CWU);
+    if (this._element) {
+      this._element.remove();
+      this._element = null;
+    }
   }
 
   private _createResources(): void {
@@ -114,6 +134,7 @@ export abstract class Component<
   private _render(): void {
     const component = this.render();
     if (this._element) {
+      this.unbindElements();
       const temp = document.createElement("template");
       temp.innerHTML = component.trim();
       const newElement = temp.content.firstElementChild;
@@ -173,7 +194,7 @@ export abstract class Component<
   public show(): void {
     const content = this.getContent();
     if (content) {
-      content.style.display = "block";
+      content.style.display = "flex";
     }
   }
 

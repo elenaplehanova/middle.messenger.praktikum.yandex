@@ -1,14 +1,7 @@
-.modal {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgb(0 0 0 / 50%);
-  justify-content: center;
-  align-items: center;
+@use "@styles/mixin/modal" as *;
 
-  &_active {
-    display: flex;
-  }
+.modal {
+  @include modal;
 }
 
 .add-user {

@@ -27,14 +27,12 @@ interface ChatProps {
 }
 
 class Chat extends Component<ChatProps> {
-  private _props: ChatProps;
   private _button: Button;
   private _items: NodeListOf<Element> | null = null;
   private _buttonEvents: HTMLElement | null = null;
   private _userSettingsLink: HTMLElement | null = null;
   private _deleteButton: HTMLElement | null = null;
   private _addUserModal;
-  private _addUserModalEvents: HTMLElement | null = null;
 
   constructor(props: ChatProps = {}) {
     const button = new Button({
@@ -44,7 +42,6 @@ class Chat extends Component<ChatProps> {
     const addUserModal = new AddUser({});
     super("template", { ...props, button, addUserModal });
     this._button = button;
-    this._props = props;
     this._addUserModal = addUserModal;
   }
 
@@ -52,6 +49,7 @@ class Chat extends Component<ChatProps> {
     if (Store.getState()?.currentChatId === id) return;
     if (id) {
       Store.set("currentChatId", id);
+      Store.set("users", null);
     }
   };
 
@@ -59,12 +57,21 @@ class Chat extends Component<ChatProps> {
     e.preventDefault();
     e.stopPropagation();
     await chatsApi.delete({ chatId: id });
+    Store.set("chats", null);
+    Store.set("currentChatId", null);
     await this.getChatsData();
   };
 
   handlerClickAddChat = (e: Event) => {
     e.preventDefault();
-    this._addUserModalEvents?.classList.add("modal_active");
+    e.stopPropagation();
+    this._addUserModal.show();
+  };
+
+  handleClickOutModal = (e: Event) => {
+    if (e.target === this._addUserModal.getContent()) {
+      this._addUserModal.hide();
+    }
   };
 
   render() {
@@ -99,14 +106,7 @@ class Chat extends Component<ChatProps> {
     this._items = this.element.querySelectorAll(".chat__item");
     this._buttonEvents = this.element.querySelector("#button");
     this._userSettingsLink = this.element.querySelector("#user-settings");
-    this._addUserModalEvents = this.element.querySelector("#user-modal");
   }
-
-  handleClickOutModal = (e: Event) => {
-    if (e.target === this._addUserModalEvents) {
-      this._addUserModalEvents?.classList.remove("modal_active");
-    }
-  };
 
   bindElements() {
     this._items?.forEach((item: Element) => {
@@ -124,17 +124,15 @@ class Chat extends Component<ChatProps> {
   }
 
   unbindElements() {
-    if (this._props.chats) {
-      this._items?.forEach((item: Element) => {
-        const chatId = Number(item.getAttribute("data-id"));
-        item.removeEventListener("click", this.handleClickChat(chatId));
-        this._deleteButton = item.querySelector("#delete-button");
-        this._deleteButton?.removeEventListener(
-          "click",
-          (e: Event) => void this.handlerClickDeleteChat(e, chatId)
-        );
-      });
-    }
+    this._items?.forEach((item: Element) => {
+      const chatId = Number(item.getAttribute("data-id"));
+      item.removeEventListener("click", this.handleClickChat(chatId));
+      this._deleteButton = item.querySelector("#delete-button");
+      this._deleteButton?.removeEventListener(
+        "click",
+        (e: Event) => void this.handlerClickDeleteChat(e, chatId)
+      );
+    });
     this._buttonEvents?.removeEventListener("click", this.handlerClickAddChat);
     this._userSettingsLink?.removeEventListener("click", this.handlerClickLink);
     window.removeEventListener("click", this.handleClickOutModal);

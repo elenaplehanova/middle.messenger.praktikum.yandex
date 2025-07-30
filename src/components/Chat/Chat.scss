@@ -10,8 +10,11 @@
 
   &__title {
     font-size: 24px;
-    text-align: center;
     border-bottom: 1px solid var(--violet-bright-2, black);
+    height: 39px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   &__item {

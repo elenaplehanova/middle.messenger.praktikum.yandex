@@ -70,8 +70,8 @@ export class AddUser extends Component {
             Store.set("currentChatId", newChat.id);
           }
 
-          //закрыть модалку
-          this.element?.classList.remove("modal_active");
+          if (!this.element) return;
+          this.element.style.display = "none";
         }
       } catch (error) {
         console.dir(error);
@@ -87,8 +87,11 @@ export class AddUser extends Component {
 
   handleClickClose = (e: Event) => {
     e.preventDefault();
-    this.element?.classList.remove("modal_active");
+    if (!this.element) return;
+    this.element.style.display = "none";
   };
+
+  private _boundHandleSubmit = (e: Event) => void this.handleSubmit(e);
 
   findElements(): void {
     if (!this.element) return;
@@ -98,19 +101,13 @@ export class AddUser extends Component {
   }
 
   bindElements(): void {
-    this._form?.addEventListener(
-      "submit",
-      (e: Event) => void this.handleSubmit(e)
-    );
+    this._form?.addEventListener("submit", this._boundHandleSubmit);
     this._userLogin?.addEventListener("blur", this.handleLoginBlur);
     this._closeButton?.addEventListener("click", this.handleClickClose);
   }
 
   unbindElements(): void {
-    this._form?.removeEventListener(
-      "submit",
-      (e: Event) => void this.handleSubmit(e)
-    );
+    this._form?.removeEventListener("submit", this._boundHandleSubmit);
     this._userLogin?.removeEventListener("blur", this.handleLoginBlur);
     this._closeButton?.removeEventListener("click", this.handleClickClose);
   }

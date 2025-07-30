@@ -1,10 +1,8 @@
 import isEqual from "@/utils/isEqual";
 import type { Component } from "../Component";
 import Store, { StoreEvents } from "./Store";
-
-type Indexed<T = unknown> = {
-  [key in string]: T;
-};
+import type { Indexed } from "@/utils/set";
+import cloneDeep from "@/utils/cloneDeep";
 
 export function connect(mapStateToProps: (state: Indexed) => Indexed) {
   return function <P extends Record<string, unknown>>(
@@ -21,7 +19,7 @@ export function connect(mapStateToProps: (state: Indexed) => Indexed) {
           if (!isEqual(oldState, newState)) {
             this.setProps(newState);
           }
-          oldState = newState;
+          oldState = cloneDeep(newState);
         });
       }
     };
