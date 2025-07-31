@@ -1,0 +1,71 @@
+import type { Component } from "../Component";
+
+const render = (query: string, block: Component) => {
+  const root = document.querySelector(query);
+  if (!root) {
+    throw new Error(`Element "${query}" not found`);
+  }
+
+  root.innerHTML = "";
+  const content = block.getContent();
+  if (content) {
+    root.replaceChildren(content);
+  }
+  block.dispatchComponentDidMount();
+
+  return root;
+};
+
+type RouteProps = {
+  rootQuery: string;
+  [key: string]: unknown;
+};
+
+export class Route {
+  protected _pathname: string;
+  protected _blockClass: new (props?: Record<string, unknown>) => Component;
+  protected _block: Component | null;
+  protected _props: RouteProps;
+
+  constructor(
+    pathname: string,
+    view: new (props?: Record<string, unknown>) => Component,
+    props: RouteProps
+  ) {
+    this._pathname = pathname;
+    this._blockClass = view;
+    this._block = null;
+    this._props = props;
+  }
+
+  navigate = (pathname: string) => {
+    if (this.match(pathname)) {
+      this._pathname = pathname;
+      this.render();
+    }
+  };
+
+  leave = () => {
+    if (this._block) {
+      const root = document.querySelector(this._props.rootQuery);
+      if (root) {
+        root.innerHTML = "";
+      }
+      this._block = null;
+    }
+  };
+
+  match = (pathname: string): boolean => {
+    return this._pathname === "*" || this._pathname === pathname;
+  };
+
+  public getPathname = (): string => {
+    return this._pathname;
+  };
+
+  render = () => {
+    // this.leave();
+    this._block = new this._blockClass({});
+    render(this._props.rootQuery, this._block);
+  };
+}

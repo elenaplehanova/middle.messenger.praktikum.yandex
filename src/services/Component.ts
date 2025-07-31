@@ -1,3 +1,4 @@
+import isEqual from "@/utils/isEqual";
 import { EventBus } from "./EventBus";
 
 export type Props<T = unknown> = T & Record<string, unknown>;
@@ -10,6 +11,7 @@ export abstract class Component<
     FLOW_CDM: "flow:component-did-mount",
     FLOW_CDU: "flow:component-did-update",
     FLOW_RENDER: "flow:render",
+    FLOW_CWU: "flow:component-will-unmount",
   } as const;
 
   private _element: HTMLElement | null = null;
@@ -45,6 +47,25 @@ export abstract class Component<
     eventBus.on(Component.EVENTS.FLOW_CDM, this._componentDidMount.bind(this));
     eventBus.on(Component.EVENTS.FLOW_CDU, this._componentDidUpdate.bind(this));
     eventBus.on(Component.EVENTS.FLOW_RENDER, this._render.bind(this));
+    eventBus.on(
+      Component.EVENTS.FLOW_CWU,
+      this._componentWillUnmount.bind(this)
+    );
+  }
+
+  private _componentWillUnmount(): void {
+    this.componentWillUnmount();
+    this.unbindElements();
+  }
+
+  protected componentWillUnmount(): void {}
+
+  public destroy(): void {
+    this.eventBus().emit(Component.EVENTS.FLOW_CWU);
+    if (this._element) {
+      this._element.remove();
+      this._element = null;
+    }
   }
 
   private _createResources(): void {
@@ -58,11 +79,13 @@ export abstract class Component<
   }
 
   private _componentDidMount(): void {
-    this.componentDidMount(this._meta.props);
+    this.componentDidMount();
   }
 
-  protected componentDidMount(oldProps?: Props<T>): void {
-    console.log("oldProps", oldProps);
+  protected componentDidMount(): void {
+    this.renderComponent();
+    this.findElements();
+    this.bindElements();
   }
 
   public dispatchComponentDidMount(): void {
@@ -70,26 +93,38 @@ export abstract class Component<
   }
 
   private _componentDidUpdate(oldProps: Props<T>, newProps: Props<T>): void {
-    const response = this.componentDidUpdate(oldProps, newProps);
-    if (!response) {
-      return;
+    const shouldUpdate = this.componentDidUpdate(oldProps, newProps);
+    if (shouldUpdate) {
+      this.unbindElements();
+      this._render();
+      this.findElements();
+      this.bindElements();
     }
-    this._render();
   }
+  protected unbindElements() {}
+  protected findElements() {}
+  protected bindElements() {}
 
   protected componentDidUpdate(
     oldProps: Props<T>,
     newProps: Props<T>
   ): boolean {
-    console.log("oldProps", oldProps, "newProps", newProps);
-    return true;
+    return !isEqual(oldProps, newProps);
   }
 
-  public setProps(nextProps: Props<T>): void {
-    if (!nextProps) {
+  setProps(nextProps: Props) {
+    if (!nextProps) return;
+
+    const oldProps = { ...this.props };
+    const newProps = { ...this.props, ...nextProps };
+
+    if (isEqual(oldProps, newProps)) {
       return;
     }
+
     Object.assign(this.props, nextProps);
+
+    this.eventBus().emit(Component.EVENTS.FLOW_CDU, oldProps, this.props);
   }
 
   get element(): HTMLElement | null {
@@ -99,6 +134,7 @@ export abstract class Component<
   private _render(): void {
     const component = this.render();
     if (this._element) {
+      this.unbindElements();
       const temp = document.createElement("template");
       temp.innerHTML = component.trim();
       const newElement = temp.content.firstElementChild;
@@ -110,6 +146,8 @@ export abstract class Component<
       }
       this._element.replaceWith(newElement);
       this._element = newElement;
+
+      this.renderComponent();
     }
   }
 
@@ -117,9 +155,11 @@ export abstract class Component<
     return "";
   }
 
-  public getContent(): HTMLElement | null {
+  protected renderComponent() {}
+
+  public getContent = (): HTMLElement | null => {
     return this.element;
-  }
+  };
 
   private _makePropsProxy(props: Props<T>): Props<T> {
     return new Proxy(props, {
@@ -136,8 +176,9 @@ export abstract class Component<
         prop: K,
         value: Props[K]
       ): boolean => {
+        const oldProps = { ...target };
         target[prop] = value;
-        this.eventBus().emit(Component.EVENTS.FLOW_CDU, { ...target }, target);
+        this.eventBus().emit(Component.EVENTS.FLOW_CDU, oldProps, target);
         return true;
       },
       deleteProperty: () => {
@@ -153,7 +194,7 @@ export abstract class Component<
   public show(): void {
     const content = this.getContent();
     if (content) {
-      content.style.display = "block";
+      content.style.display = "flex";
     }
   }
 

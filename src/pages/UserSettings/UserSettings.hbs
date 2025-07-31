@@ -3,7 +3,8 @@
     <form class="user-settings__form">
         <div class="user-settings__content">
             <div class="user-settings__block">
-                <img class="photo user-settings__photo" src="" id="image" />
+                <img class="photo user-settings__photo" src="https://ya-praktikum.tech/api/v2/resources/{{user.avatar}}"
+                    id="image" />
                 <button class="user-settings__button-change-photo" id="changePhoto" type="button">
                     Change photo
                 </button>
@@ -12,47 +13,56 @@
             <div class="user-settings__block">
                 <div class="input-block__input-wrapper">
                     <label class="input-block__input-label" for="first_name">First name</label>
-                    <input class="input-block__input" type="text" name="first_name" id="first_name" />
+                    <input class="input-block__input" type="text" name="first_name" id="first_name"
+                        value="{{user.first_name}}" />
                     <div class="input-block__input-error" id="first_name-error"></div>
                 </div>
                 <div class="input-block__input-wrapper">
                     <label class="input-block__input-label" for="second_name">Second name</label>
-                    <input class="input-block__input" type="text" name="second_name" id="second_name" />
+                    <input class="input-block__input" type="text" name="second_name" id="second_name"
+                        value="{{user.second_name}}" />
                     <div class="input-block__input-error" id="second_name-error"></div>
                 </div>
                 <div class="input-block__input-wrapper">
                     <label class="input-block__input-label" for="display_name">Display name</label>
-                    <input class="input-block__input" type="text" name="display_name" id="display_name" />
+                    <input class="input-block__input" type="text" name="display_name" id="display_name"
+                        value="{{user.display_name}}" />
                     <div class="input-block__input-error" id="display_name-error"></div>
                 </div>
                 <div class="input-block__input-wrapper">
                     <label class="input-block__input-label" for="login">Login</label>
-                    <input class="input-block__input" type="text" name="login" id="login" />
+                    <input class="input-block__input" type="text" name="login" id="login" value="{{user.login}}" />
                     <div class="input-block__input-error" id="login-error"></div>
                 </div>
                 <div class="input-block__input-wrapper">
                     <label class="input-block__input-label" for="email">E-mail</label>
-                    <input class="input-block__input" type="email" name="email" id="email" />
+                    <input class="input-block__input" type="email" name="email" id="email" value="{{user.email}}" />
                     <div class="input-block__input-error" id="email-error"></div>
                 </div>
                 <div class="input-block__input-wrapper">
                     <label class="input-block__input-label" for="phone">Phone</label>
-                    <input class="input-block__input" type="tel" name="phone" id="phone" />
+                    <input class="input-block__input" type="tel" name="phone" id="phone" value="{{user.phone}}" />
                     <div class="input-block__input-error" id="phone-error"></div>
+                </div>
+                <div class="user-settings__password-toggle">
+                    <label class="user-settings__toggle-label" for="password-toggle">Change password</label>
+                    <input type="checkbox" id="password-toggle">
                 </div>
                 <div class="input-block__input-wrapper">
                     <label class="input-block__input-label" for="oldPassword">Old password</label>
-                    <input class="input-block__input" type="oldPassword" name="oldPassword" id="oldPassword" />
+                    <input class="input-block__input" type="text" name="oldPassword" id="oldPassword" disabled
+                        value="{{user.oldPassword}}" />
                     <div class="input-block__input-error" id="oldPassword-error"></div>
                 </div>
                 <div class="input-block__input-wrapper">
                     <label class="input-block__input-label" for="newPassword">New password</label>
-                    <input class="input-block__input" type="newPassword" name="password" id="newPassword" />
+                    <input class="input-block__input" type="text" name="password" id="newPassword" disabled
+                        value="{{user.newPassword}}" />
                     <div class="input-block__input-error" id="newPassword-error"></div>
                 </div>
             </div>
         </div>
-        <button class="button user-settings__button" type="submit">Save</button>
+        <div data-component="button"></div>
     </form>
-    <a class="link" href="sign-in">Log out</a>
+    <a class="link" href="logOut" id="logOut">Log out</a>
 </div>

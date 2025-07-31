@@ -1,0 +1,26 @@
+<div class="current-users__modal" id="current-users-modal">
+    <div class="current-users">
+        <span id="modal-close" class="current-users__button-close">✖</span>
+        <h1 class="title">Current users</h1>
+        <div class="current-users__list">
+            {{#each users}}
+            {{#if login}}
+            <article class="user-item" data-id="{{id}}">
+                <img class="photo user-item__photo" src="https://ya-praktikum.tech/api/v2/resources/{{avatar}}" />
+                <p class="user-item__name">{{login}}</p>
+                <button class="button user-item__button" id="delete-button">✖</button>
+            </article>
+            {{/if}}
+            {{/each}}
+        </div>
+        <h2 class="title current-users__title">Add new user</h2>
+        <form class="current-users__form" id="current-users-form">
+            <div class="input-block__input-wrapper">
+                <label class="input-block__input-label" for="login">Login</label>
+                <input class="input-block__input" type="text" name="login" id="login" />
+                <div class="input-block__input-error" id="login-error"></div>
+            </div>
+            <div data-component="button"></div>
+        </form>
+    </div>
+</div>

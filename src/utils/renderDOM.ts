@@ -12,7 +12,10 @@ export function render(query: string, component: Component): HTMLElement {
     throw new Error("The component does not return the content");
   }
 
-  root.appendChild(content);
+  // root.appendChild(content);
+  if (root) {
+    root.replaceChildren(content);
+  }
 
   component.dispatchComponentDidMount();
 

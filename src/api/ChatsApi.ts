@@ -1,0 +1,31 @@
+import { BaseAPI } from "@/api/BaseApi";
+import api from "@/api/api";
+import type { ChatData } from "@/components/Chat/Chat";
+import type { ChatToken } from "@/components/ChatRoom/ChatRoom";
+import type { QueryParams } from "@/services/HTTPTransport";
+
+export class ChatsApi extends BaseAPI {
+  getChats(): Promise<unknown> {
+    return api.get(`${BaseAPI.BASE_URL}/chats`);
+  }
+  create(data: QueryParams): Promise<ChatData> {
+    return api.post(`${BaseAPI.BASE_URL}/chats`, { data });
+  }
+  delete(data: QueryParams): Promise<unknown> {
+    return api.delete(`${BaseAPI.BASE_URL}/chats`, { data });
+  }
+  addUsersToChat(data: QueryParams): Promise<unknown> {
+    return api.put(`${BaseAPI.BASE_URL}/chats/users`, { data });
+  }
+  getToken(id: number): Promise<ChatToken> {
+    return api.post(`${BaseAPI.BASE_URL}/chats/token/${id}`);
+  }
+  getChatsUsers(id: number): Promise<unknown> {
+    return api.get(`${BaseAPI.BASE_URL}/chats/${id}/users`);
+  }
+  deleteUsersFromChat(data: QueryParams): Promise<unknown> {
+    return api.delete(`${BaseAPI.BASE_URL}/chats/users`, { data });
+  }
+}
+
+export const chatsApi = new ChatsApi();

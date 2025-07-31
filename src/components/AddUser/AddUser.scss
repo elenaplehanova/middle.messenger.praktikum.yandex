@@ -1,0 +1,25 @@
+@use "@styles/mixin/modal" as *;
+
+.modal {
+  @include modal;
+}
+
+.add-user {
+  display: flex;
+  margin: auto;
+  padding: 20px;
+  flex-direction: column;
+  align-items: center;
+  background: #fff;
+  border-radius: 4px;
+  width: 450px;
+
+  &__button-close {
+    margin-left: auto;
+    cursor: pointer;
+  }
+
+  &__button-add {
+    margin-top: 16px;
+  }
+}

@@ -7,12 +7,24 @@
   background-color: var(--violet-background-dark, gray);
   width: 100%;
 
+  &__header {
+    display: flex;
+    width: 100%;
+    background-color: var(--violet-background-light-2, white);
+    height: 39px;
+    border-bottom: 1px solid var(--violet-bright-2, violet);
+    justify-content: space-between;
+    align-items: center;
+  }
+
   &__title {
     font-size: 20px;
-    border-bottom: 1px solid var(--violet-bright-2, violet);
-    height: 30px;
-    background-color: var(--violet-background-light-2, white);
     padding-left: 20px;
+  }
+
+  &__button-current-users {
+    width: fit-content;
+    margin-right: 5px;
   }
 
   &__container {

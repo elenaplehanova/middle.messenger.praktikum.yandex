@@ -13,6 +13,10 @@
     border-radius: 5px;
     height: 32px;
     padding-inline: 10px;
+
+    &:disabled {
+      background-color: var(--gray-color,gray);
+    }
   }
 
   &__input-error {

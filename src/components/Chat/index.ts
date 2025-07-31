@@ -1,1 +1,1 @@
-export { Chat } from "./Chat";
+export { ConnectedChat as Chat } from "./Chat";
