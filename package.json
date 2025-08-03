@@ -14,12 +14,8 @@
     "lint:css-fix": "stylelint \"**/*.scss\" --fix",
     "lint:all": "npm-run-all --parallel lint:css lint:js",
     "test": "mocha  --no-warnings",
-    "test:watch": "mocha --watch"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "npm-run-all test lint:all"
-    }
+    "test:watch": "mocha --watch",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@babel/core": "^7.28.0",
