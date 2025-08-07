@@ -1,4 +1,4 @@
-import type { Component } from "../Component";
+import type { Component } from "../Component.js";
 
 const render = (query: string, block: Component) => {
   const root = document.querySelector(query);
@@ -64,7 +64,6 @@ export class Route {
   };
 
   render = () => {
-    // this.leave();
     this._block = new this._blockClass({});
     render(this._props.rootQuery, this._block);
   };

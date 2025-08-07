@@ -1,6 +1,7 @@
 {
   "extension": ["ts"],
-  "spec": ["**/*.test.ts"],
+  "spec": ["src/**/*.test.ts"],
   "recursive": true,
-  "loader": "ts-node/esm"
+  "loader": "ts-node/esm",
+  "require": ["./mochaSetup.js"]
 }

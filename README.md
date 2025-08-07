@@ -3,6 +3,10 @@
 [![Handlebars](https://img.shields.io/badge/Handlebars.js-f0772b?style=for-the-badge&logo=handlebars.js&logoColor=black)](https://handlebarsjs.com/)
 [![Netlify](https://img.shields.io/badge/Netlify-00C7B7?style=for-the-badge&logo=netlify&logoColor=white)](https://statuesque-puppy-8f0c54.netlify.app)
 [![Node.js](https://img.shields.io/badge/Node.js-18.0.0+-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Mocha](https://img.shields.io/badge/Mocha-8D6748?style=for-the-badge&logo=mocha&logoColor=white)](https://mochajs.org/)
+[![Chai](https://img.shields.io/badge/Chai-A30701?style=for-the-badge&logo=chai&logoColor=white)](https://www.chaijs.com/)
+[![Sinon](https://img.shields.io/badge/Sinon-6A4C93?style=for-the-badge)](https://sinonjs.org/)
+[![Husky](https://img.shields.io/badge/Husky-1A1A1A?style=for-the-badge&logo=git&logoColor=white)](https://typicode.github.io/husky)
 
 ## Описание
 
@@ -31,8 +35,12 @@
 
 - **Vite**
 - **Handlebars**
-- **TS**
+- **TypeScript (TS)**
 - **SCSS**
+- **Mocha**
+- **Chai**
+- **Sinon**
+- **Husky**
 
 ## Быстрый старт
 
@@ -45,6 +53,9 @@ npm run start
 
 # Запуск проекта в режиме разработки
 npm run dev
+
+# Запуск тестов
+npm run test
 ```
 
 > 💡 Проект требует **Node.js 18+**
