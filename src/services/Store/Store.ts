@@ -1,7 +1,7 @@
 import set from "@/utils/set";
 import type { Indexed } from "@/utils/set";
 import { EventBus } from "../EventBus";
-import isEqual from "@/utils/isEqual";
+import { isEqual } from "@/utils/isEqual";
 import cloneDeep from "@/utils/cloneDeep";
 
 export enum StoreEvents {

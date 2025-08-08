@@ -1,6 +1,7 @@
-import queryStringify from "@/utils/queryStringify";
+import type { Indexed } from "../utils/set.js";
+import queryStringify from "../utils/queryStringify.js";
 
-enum METHODS {
+export enum METHODS {
   GET = "GET",
   POST = "POST",
   PUT = "PUT",
@@ -17,7 +18,7 @@ export type QueryParams = Record<
   string | number | boolean | (string | number)[]
 >;
 
-type RequestOptions<T = unknown> = {
+export type RequestOptions<T = unknown> = {
   headers?: Record<string, string>;
   method?: METHODS;
   data?: T;
@@ -90,9 +91,9 @@ export class HTTPTransport {
       const isGet = method === METHODS.GET;
 
       const isFormData = data instanceof FormData;
-      if (isGet && data && typeof data === "object" && !data && !isFormData) {
-        const query = queryStringify(data);
-        xhr.open(method, `${url}${query}`);
+      if (data && isGet && typeof data === "object" && !isFormData) {
+        const query = queryStringify(data as Indexed);
+        xhr.open(method, `${url}?${query}`);
       } else {
         xhr.open(method, url);
       }

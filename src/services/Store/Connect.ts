@@ -1,4 +1,4 @@
-import isEqual from "@/utils/isEqual";
+import { isEqual } from "@/utils/isEqual";
 import type { Component } from "../Component";
 import Store, { StoreEvents } from "./Store";
 import type { Indexed } from "@/utils/set";

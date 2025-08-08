@@ -1,5 +1,5 @@
-import type { Component } from "../Component";
-import { Route } from "./Route";
+import type { Component } from "../Component.js";
+import { Route } from "./Route.js";
 
 export class Router {
   private static __instance: Router;

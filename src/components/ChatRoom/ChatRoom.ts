@@ -12,7 +12,7 @@ import type { Indexed } from "@/utils/set";
 import { connect } from "@/services/Store/Connect";
 import type { ChatData } from "../Chat/Chat";
 import { chatsApi } from "@/api/ChatsApi";
-import isEqual from "@/utils/isEqual";
+import { isEqual } from "@/utils/isEqual";
 import { WebSocketClient } from "@/services/WebSocketClient";
 import Store from "@/services/Store/Store";
 import type { UserData } from "@/pages/UserSettings/UserSettings";

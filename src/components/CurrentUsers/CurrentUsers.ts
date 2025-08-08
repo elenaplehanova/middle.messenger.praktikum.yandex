@@ -10,7 +10,7 @@ import { chatsApi } from "@/api/ChatsApi";
 import type { UserData } from "@/pages/UserSettings/UserSettings";
 import Store from "@/services/Store/Store";
 import { userApi } from "@/api/UserApi";
-import isEqual from "@/utils/isEqual";
+import { isEqual } from "@/utils/isEqual";
 
 interface CurrentUsersProps extends Record<string, unknown> {
   button?: Button;

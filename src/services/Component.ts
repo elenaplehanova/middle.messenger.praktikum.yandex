@@ -1,5 +1,5 @@
-import isEqual from "@/utils/isEqual";
-import { EventBus } from "./EventBus";
+import { isEqual } from "../utils/isEqual.js";
+import { EventBus } from "./EventBus.js";
 
 export type Props<T = unknown> = T & Record<string, unknown>;
 

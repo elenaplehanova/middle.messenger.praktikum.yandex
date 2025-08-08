@@ -1,4 +1,4 @@
-import type { Indexed } from "@/utils/set";
+import type { Indexed } from "../utils/set.js";
 
 export function isIndexed(value: unknown): value is Indexed {
   return (
@@ -53,5 +53,3 @@ export function isEqual(lhs: unknown, rhs: unknown): boolean {
     return lhs === rhs;
   }
 }
-
-export default isEqual;

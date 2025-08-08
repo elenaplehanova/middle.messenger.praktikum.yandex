@@ -24,5 +24,8 @@
       "@components/*": ["src/components/*"]
     }
   },
+  "ts-node": {
+    "esm": true
+  },
   "include": ["src"]
 }

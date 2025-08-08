@@ -1,7 +1,7 @@
-import type { Indexed } from "@/utils/set";
+import type { Indexed } from "../utils/set";
 
-function queryStringify(data: Indexed): string | never {
-  if (typeof data !== "object" || !data) {
+function queryStringify(data: Indexed): string {
+  if (typeof data !== "object" || !data || Object.keys(data).length < 0) {
     throw new Error("Data must be object");
   }
 
